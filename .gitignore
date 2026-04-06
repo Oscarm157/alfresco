@@ -1,0 +1,16 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Sensitive
+*.env
+credentials/
+dashboard/.env.local
+dashboard/node_modules/
+dashboard/.next/
+*.xlsx
+*.png

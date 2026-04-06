@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Sora:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #383838;
+  --atisa-red: #D2262C;
+  --atisa-red-hover: #B91827;
+  --surface: #F5F5F5;
+  --surface-alt: #F1F3F3;
+  --text-primary: #383838;
+  --text-secondary: #656565;
+  --text-tertiary: #999999;
+  --sidebar-bg: #383838;
+  --status-resolved: #10B981;
+  --status-pending: #F59E0B;
+  --status-cancelled: #EF4444;
+  --status-escalated: #8B5CF6;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-atisa: var(--atisa-red);
+  --color-atisa-hover: var(--atisa-red-hover);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-sidebar: var(--sidebar-bg);
+  --color-resolved: var(--status-resolved);
+  --color-pending: var(--status-pending);
+  --color-cancelled: var(--status-cancelled);
+  --color-escalated: var(--status-escalated);
+  --font-heading: 'Sora', sans-serif;
+  --font-sans: 'DM Sans', sans-serif;
+  --font-mono: 'Space Grotesk', monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* Recharts tooltip custom */
+.recharts-tooltip-wrapper { outline: none !important; }
