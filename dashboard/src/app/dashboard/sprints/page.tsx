@@ -10,6 +10,8 @@ import { Clock, Target, AlertTriangle, Zap, ChevronLeft, ChevronRight } from 'lu
 import { useSprintStats } from '@/hooks/use-sprint-stats'
 import { KPICard } from '@/components/dashboard/kpi-card'
 import { ChartCard } from '@/components/dashboard/chart-card'
+import { SprintForm } from '@/components/sprints/sprint-form'
+import { TaskList } from '@/components/sprints/task-list'
 import { TASK_TYPE_OPTIONS } from '@/lib/sprint-types'
 import type { SprintHour, Sprint } from '@/lib/sprint-types'
 import { format, subMonths, addMonths } from 'date-fns'
@@ -50,6 +52,7 @@ export default function SprintsPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [hours, setHours] = useState<SprintHour[]>([])
   const [sprints, setSprints] = useState<Sprint[]>([])
+  const [tasks, setTasks] = useState<Record<string, any[]>>({})
   const [loading, setLoading] = useState(true)
 
   const monthKey = format(currentMonth, 'yyyy-MM')
@@ -57,13 +60,24 @@ export default function SprintsPage() {
 
   const fetchData = useCallback(async () => {
     setLoading(true)
-    const [hoursRes, sprintsRes] = await Promise.all([
+    const [hoursRes, sprintsRes, tasksRes] = await Promise.all([
       fetch(`/api/sprints/hours?month=${monthKey}`),
       fetch(`/api/sprints?month=${monthKey}`),
+      fetch(`/api/sprints/tasks?month=${monthKey}`),
     ])
-    const [hoursData, sprintsData] = await Promise.all([hoursRes.json(), sprintsRes.json()])
+    const [hoursData, sprintsData, tasksData] = await Promise.all([hoursRes.json(), sprintsRes.json(), tasksRes.json()])
     setHours(Array.isArray(hoursData) ? hoursData : [])
     setSprints(Array.isArray(sprintsData) ? sprintsData : [])
+
+    // Group tasks by sprint name
+    const grouped: Record<string, any[]> = {}
+    if (Array.isArray(tasksData)) {
+      tasksData.forEach((t: any) => {
+        if (!grouped[t.sprint_name]) grouped[t.sprint_name] = []
+        grouped[t.sprint_name].push(t)
+      })
+    }
+    setTasks(grouped)
     setLoading(false)
   }, [monthKey])
 
@@ -359,6 +373,35 @@ export default function SprintsPage() {
             </div>
           )}
         </ChartCard>
+      </motion.div>
+
+      {/* Sprint Management & Tasks */}
+      <motion.div variants={itemVariants} className="mt-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-heading font-bold text-lg text-text-primary">
+            Tablero de <span className="text-atisa">Sprints</span>
+          </h2>
+          <SprintForm monthKey={monthKey} onCreated={fetchData} />
+        </div>
+
+        {sprints.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] text-center py-16">
+            <Target size={40} className="mx-auto text-text-tertiary mb-3" />
+            <p className="text-lg font-medium text-text-primary mb-1">Sin sprints para este mes</p>
+            <p className="text-sm text-text-tertiary">Crea un sprint para empezar a agregar tareas</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {sprints.map(s => (
+              <TaskList
+                key={s.id}
+                sprint={s}
+                tasks={tasks[s.name] || []}
+                onRefresh={fetchData}
+              />
+            ))}
+          </div>
+        )}
       </motion.div>
     </motion.div>
   )
