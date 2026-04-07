@@ -1,5 +1,5 @@
--- ============================================
--- MÓDULO SPRINTS / APPROPIA — SCHEMA
+﻿-- ============================================
+-- MODULO SPRINTS / APPROPIA - SCHEMA
 -- Ejecutar en Supabase SQL Editor
 -- ============================================
 
@@ -49,3 +49,4 @@ CREATE POLICY "Allow all select" ON sprints FOR SELECT USING (true);
 CREATE POLICY "Allow all insert" ON sprints FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow all update" ON sprints FOR UPDATE USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all delete" ON sprints FOR DELETE USING (true);
+

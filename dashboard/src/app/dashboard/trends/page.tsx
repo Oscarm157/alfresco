@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { motion } from 'motion/react'
@@ -67,7 +67,7 @@ export default function TrendsPage() {
         <span className="text-atisa">Tendencias</span>
       </h1>
       <p className="text-sm text-text-tertiary mb-8">
-        Evolución de métricas mes a mes
+        Evolucion de metricas mes a mes
       </p>
 
       <div className="grid grid-cols-1 gap-4">
@@ -93,7 +93,7 @@ export default function TrendsPage() {
         </ChartCard>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <ChartCard title="Tasa de resolución" tag="% MENSUAL">
+          <ChartCard title="Tasa de resolucion" tag="% MENSUAL">
             <div className="h-[240px]">
               <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={monthlyData}>
@@ -101,13 +101,13 @@ export default function TrendsPage() {
                   <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#999' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 12, fill: '#999' }} axisLine={false} tickLine={false} domain={[0, 100]} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Line type="monotone" dataKey="resolutionRate" name="Resolución %" stroke="#10B981" strokeWidth={2.5} dot={{ fill: '#10B981', r: 4 }} />
+                  <Line type="monotone" dataKey="resolutionRate" name="Resolucion %" stroke="#10B981" strokeWidth={2.5} dot={{ fill: '#10B981', r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </ChartCard>
 
-          <ChartCard title="Tiempo promedio de resolución" tag="HORAS">
+          <ChartCard title="Tiempo promedio de resolucion" tag="HORAS">
             <div className="h-[240px]">
               <ResponsiveContainer width="100%" height={260}>
                 <AreaChart data={monthlyData}>
@@ -131,3 +131,4 @@ export default function TrendsPage() {
     </motion.div>
   )
 }
+

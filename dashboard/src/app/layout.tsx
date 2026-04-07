@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { Toaster } from "sonner";
+﻿import type { Metadata } from 'next'
+import './globals.css'
+import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
-  title: "Alfresco Dashboard — ATISA",
-  description: "Dashboard de gestión de tickets de soporte Alfresco para ATISA",
+  title: "Alfresco Dashboard - ATISA",
+  description: "Dashboard de gestion de tickets de soporte Alfresco para ATISA",
 };
 
 export default function RootLayout({
@@ -30,3 +30,4 @@ export default function RootLayout({
     </html>
   );
 }
+

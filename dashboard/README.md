@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Alfresco Dashboard
 
-## Getting Started
+Dashboard web para seguimiento de tickets de soporte Alfresco y control de sprints de Appropia para ATISA.
 
-First, run the development server:
+## Stack
+
+- Next.js 16
+- React 19
+- Tailwind CSS 4
+- Supabase
+- Recharts
+
+## Funcionalidad
+
+- Dashboard general de tickets
+- Vista detallada de tickets
+- Importacion de tickets desde Excel o CSV
+- Seguimiento de tendencias mensuales
+- Comparativa entre meses
+- Control de horas y sprints de Appropia
+- Importacion de horas de sprint
+
+## Requisitos
+
+- Node.js 20 o superior
+- npm 10 o superior
+- Un proyecto de Supabase con las tablas necesarias
+
+## Variables de entorno
+
+Crea un archivo `.env.local` con:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NEXT_PUBLIC_SUPABASE_URL=tu_url_de_supabase
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Desarrollo local
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+La aplicacion queda disponible en `http://localhost:3000`.
 
-## Learn More
+## Verificacion antes de publicar
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run lint
+npm run build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Despliegue
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Puedes desplegarlo en Vercel o en cualquier entorno compatible con Next.js.
 
-## Deploy on Vercel
+Checklist minimo:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Variables de entorno configuradas
+- Supabase accesible desde produccion
+- `npm run build` exitoso
+- Importaciones de tickets y horas validadas con datos reales
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Notas
+
+- La ruta inicial redirige a `/dashboard`
+- El proyecto esta pensado para uso publico o interno sin autenticacion fuerte
+- El esquema SQL complementario de sprints esta en `sprint-schema.sql`

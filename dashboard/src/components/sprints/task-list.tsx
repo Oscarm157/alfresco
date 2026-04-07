@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
@@ -22,9 +22,9 @@ interface SprintTask {
 const LABELS = [
   'INTERFAZ DE ADMIN',
   'CIERRE DE OBRAS',
-  'AFINACIÓN DE CARACTERÍSTICAS',
-  'VALIDACIÓN DE DOCUMENTOS',
-  'GESTIÓN DE PROVEEDORES',
+  'AFINACION DE CARACTERISTICAS',
+  'VALIDACION DE DOCUMENTOS',
+  'GESTION DE PROVEEDORES',
   'REPORTES Y KPI',
   'INTEGRACIONES',
   'OTRO',
@@ -68,7 +68,7 @@ export function TaskList({ sprint, tasks, onRefresh }: TaskListProps) {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.jira_key || !form.title) { toast.error('ID y título requeridos'); return }
+    if (!form.jira_key || !form.title) { toast.error('ID y titulo requeridos'); return }
 
     setLoading(true)
     try {
@@ -95,20 +95,31 @@ export function TaskList({ sprint, tasks, onRefresh }: TaskListProps) {
   }
 
   const handleDelete = async (id: string) => {
-    const res = await fetch(`/api/sprints/tasks/${id}`, { method: 'DELETE' })
-    if (res.ok) { toast.success('Tarea eliminada'); onRefresh() }
+    try {
+      const res = await fetch(`/api/sprints/tasks/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('No se pudo eliminar la tarea')
+      toast.success('Tarea eliminada')
+      onRefresh()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo eliminar la tarea')
+    }
   }
 
   const handleStatusChange = async (id: string, status?: string, priority?: string) => {
     const body: Record<string, string> = {}
     if (status) body.status = status
     if (priority) body.priority = priority
-    const res = await fetch(`/api/sprints/tasks/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-    if (res.ok) onRefresh()
+    try {
+      const res = await fetch(`/api/sprints/tasks/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error('No se pudo actualizar la tarea')
+      onRefresh()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo actualizar la tarea')
+    }
   }
 
   return (
@@ -123,7 +134,7 @@ export function TaskList({ sprint, tasks, onRefresh }: TaskListProps) {
           <span className="font-heading font-semibold text-sm text-text-primary">{sprint.name}</span>
           {sprint.start_date && sprint.end_date && (
             <span className="text-sm text-text-tertiary">
-              {sprint.start_date} – {sprint.end_date}
+              {sprint.start_date} - {sprint.end_date}
             </span>
           )}
           <span className="text-sm text-text-tertiary">({tasks.length} tareas)</span>
@@ -245,7 +256,7 @@ export function TaskList({ sprint, tasks, onRefresh }: TaskListProps) {
                       className="h-12 px-4 rounded-xl bg-white text-sm font-mono text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-atisa/20"
                     />
                     <input
-                      placeholder="Título de la tarea"
+                      placeholder="Titulo de la tarea"
                       value={form.title}
                       onChange={e => setForm({ ...form, title: e.target.value })}
                       className="h-12 px-4 rounded-xl bg-white text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-atisa/20 col-span-2"
@@ -300,3 +311,4 @@ export function TaskList({ sprint, tasks, onRefresh }: TaskListProps) {
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
@@ -23,7 +23,7 @@ export default function ImportPage() {
     const { rows, mapping } = parseExcelFile(buffer)
 
     if (rows.length === 0) {
-      toast.error('El archivo está vacío')
+      toast.error('El archivo esta vacio')
       return
     }
 
@@ -41,6 +41,11 @@ export default function ImportPage() {
   }, [handleFile])
 
   const handleImport = async () => {
+    if (validRows.length === 0) {
+      toast.error('No hay filas validas para importar')
+      return
+    }
+
     setStep('importing')
     try {
       const res = await fetch('/api/tickets/import', {
@@ -49,12 +54,12 @@ export default function ImportPage() {
         body: JSON.stringify({ rows: validRows }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
+      if (!res.ok) throw new Error(data.error || 'No se pudieron importar los tickets')
       setImportResult(data)
       setStep('done')
       toast.success(`${data.imported} tickets importados`)
     } catch (err) {
-      toast.error('Error al importar: ' + String(err))
+      toast.error(err instanceof Error ? err.message : 'No se pudieron importar los tickets')
       setStep('preview')
     }
   }
@@ -104,7 +109,7 @@ export default function ImportPage() {
               />
               <Upload size={40} className={`mx-auto mb-4 ${dragOver ? 'text-atisa' : 'text-text-tertiary'}`} />
               <p className="text-lg font-medium text-text-primary mb-1">
-                Arrastra tu archivo aquí
+                Arrastra tu archivo aqui
               </p>
               <p className="text-sm text-text-tertiary">
                 o haz click para seleccionar · .xlsx, .xls, .csv
@@ -125,7 +130,7 @@ export default function ImportPage() {
                 <FileSpreadsheet size={20} className="text-atisa" />
                 <span className="font-medium text-text-primary">{fileName}</span>
                 <span className="font-mono text-sm text-text-tertiary">
-                  {validRows.length} filas válidas
+                  {validRows.length} filas validas
                 </span>
                 {errors.length > 0 && (
                   <span className="flex items-center gap-1 text-sm text-cancelled">
@@ -143,9 +148,9 @@ export default function ImportPage() {
                       <th className="py-2 px-3 bg-surface">Estado</th>
                       <th className="py-2 px-3 bg-surface">Fecha</th>
                       <th className="py-2 px-3 bg-surface">Prioridad</th>
-                      <th className="py-2 px-3 bg-surface">Solicitó</th>
+                      <th className="py-2 px-3 bg-surface">Solicito</th>
                       <th className="py-2 px-3 bg-surface">Tiempo</th>
-                      <th className="py-2 px-3 bg-surface rounded-r-lg">Descripción</th>
+                      <th className="py-2 px-3 bg-surface rounded-r-lg">Descripcion</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -166,7 +171,7 @@ export default function ImportPage() {
                 </table>
                 {validRows.length > 20 && (
                   <p className="text-xs text-text-tertiary text-center py-2">
-                    ... y {validRows.length - 20} filas más
+                    ... y {validRows.length - 20} filas mas
                   </p>
                 )}
               </div>
@@ -222,7 +227,7 @@ export default function ImportPage() {
           >
             <CheckCircle2 size={48} className="mx-auto text-resolved mb-4" />
             <p className="text-xl font-heading font-bold text-text-primary mb-2">
-              ¡Importación completada!
+              Importacion completada!
             </p>
             <p className="text-text-tertiary mb-6">
               {importResult?.imported} tickets importados correctamente
@@ -241,3 +246,4 @@ export default function ImportPage() {
     </div>
   )
 }
+

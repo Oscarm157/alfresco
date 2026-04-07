@@ -1,7 +1,6 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Ticket, GitCompare, TrendingUp, Upload, Menu, X, Timer, UploadCloud } from 'lucide-react'
 import { useState } from 'react'
@@ -54,8 +53,8 @@ export function Sidebar() {
         {/* Header */}
         <div className="px-5 py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-atisa rounded-lg flex items-center justify-center">
-              <Image src="/atisa-icon.png" alt="ATISA" width={20} height={20} className="brightness-0 invert" />
+            <div className="w-8 h-8 bg-atisa rounded-lg flex items-center justify-center text-[11px] font-bold text-white">
+              AT
             </div>
             <div>
               <h1 className="font-heading text-white font-bold text-base tracking-tight leading-tight">
@@ -120,3 +119,5 @@ export function Sidebar() {
     </>
   )
 }
+
+

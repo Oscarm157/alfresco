@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion } from 'motion/react'
@@ -16,6 +16,7 @@ import { TASK_TYPE_OPTIONS } from '@/lib/sprint-types'
 import type { SprintHour, Sprint } from '@/lib/sprint-types'
 import { format, subMonths, addMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { toast } from 'sonner'
 
 const containerVariants = {
   hidden: {},
@@ -55,6 +56,7 @@ export default function SprintsPage() {
   const [tasks, setTasks] = useState<Record<string, any[]>>({})
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const hasFetched = useRef(false)
 
   const monthKey = format(currentMonth, 'yyyy-MM')
@@ -64,27 +66,42 @@ export default function SprintsPage() {
     if (hasFetched.current) {
       setRefreshing(true)
     }
-    const [hoursRes, sprintsRes, tasksRes] = await Promise.all([
-      fetch(`/api/sprints/hours?month=${monthKey}`),
-      fetch(`/api/sprints?month=${monthKey}`),
-      fetch(`/api/sprints/tasks?month=${monthKey}`),
-    ])
-    const [hoursData, sprintsData, tasksData] = await Promise.all([hoursRes.json(), sprintsRes.json(), tasksRes.json()])
-    setHours(Array.isArray(hoursData) ? hoursData : [])
-    setSprints(Array.isArray(sprintsData) ? sprintsData : [])
+    setError(null)
+    try {
+      const [hoursRes, sprintsRes, tasksRes] = await Promise.all([
+        fetch(`/api/sprints/hours?month=${monthKey}`),
+        fetch(`/api/sprints?month=${monthKey}`),
+        fetch(`/api/sprints/tasks?month=${monthKey}`),
+      ])
 
-    // Group tasks by sprint name
-    const grouped: Record<string, any[]> = {}
-    if (Array.isArray(tasksData)) {
-      tasksData.forEach((t: any) => {
-        if (!grouped[t.sprint_name]) grouped[t.sprint_name] = []
-        grouped[t.sprint_name].push(t)
-      })
+      if (!hoursRes.ok || !sprintsRes.ok || !tasksRes.ok) {
+        throw new Error('No se pudieron cargar los datos de sprints')
+      }
+
+      const [hoursData, sprintsData, tasksData] = await Promise.all([hoursRes.json(), sprintsRes.json(), tasksRes.json()])
+      setHours(Array.isArray(hoursData) ? hoursData : [])
+      setSprints(Array.isArray(sprintsData) ? sprintsData : [])
+
+      const grouped: Record<string, any[]> = {}
+      if (Array.isArray(tasksData)) {
+        tasksData.forEach((t: any) => {
+          if (!grouped[t.sprint_name]) grouped[t.sprint_name] = []
+          grouped[t.sprint_name].push(t)
+        })
+      }
+      setTasks(grouped)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'No se pudieron cargar los datos de sprints'
+      setError(message)
+      setHours([])
+      setSprints([])
+      setTasks({})
+      toast.error(message)
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+      hasFetched.current = true
     }
-    setTasks(grouped)
-    setLoading(false)
-    setRefreshing(false)
-    hasFetched.current = true
   }, [monthKey])
 
   useEffect(() => { fetchData() }, [fetchData])
@@ -151,6 +168,12 @@ export default function SprintsPage() {
         </div>
       </motion.div>
 
+      {error && (
+        <motion.div variants={itemVariants} className="mb-6 rounded-2xl border border-cancelled/20 bg-cancelled/5 px-4 py-3 text-sm text-text-secondary">
+          {error}
+        </motion.div>
+      )}
+
       {/* Quota Progress Bar */}
       <motion.div variants={itemVariants} className="bg-white rounded-2xl p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)] mb-6">
         <div className="flex items-center justify-between mb-3">
@@ -176,7 +199,7 @@ export default function SprintsPage() {
           <div className="flex items-center gap-2 mt-3 text-xs text-text-tertiary">
             <AlertTriangle size={13} className="text-pending" />
             <span>
-              <span className="font-mono font-semibold text-pending">{stats.debtHours}h</span> de deuda técnica
+              <span className="font-mono font-semibold text-pending">{stats.debtHours}h</span> de deuda tecnica
               <span className="ml-1">(no afecta la cuota de 160h)</span>
             </span>
           </div>
@@ -210,11 +233,11 @@ export default function SprintsPage() {
         />
       </motion.div>
 
-      {/* Charts Row — only show when there's data */}
+      {/* Charts Row - only show when there's data */}
       {hours.length > 0 && (
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         {/* Hours by day */}
-        <ChartCard title="Horas por día" tag="DETALLE">
+        <ChartCard title="Horas por dia" tag="DETALLE">
           <div className="w-full h-[240px]">
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={stats.byDay}>
@@ -229,7 +252,7 @@ export default function SprintsPage() {
         </ChartCard>
 
         {/* Type distribution donut */}
-        <ChartCard title="Distribución por tipo" tag="TIPO">
+        <ChartCard title="Distribucion por tipo" tag="TIPO">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 min-h-[240px]">
             <ResponsiveContainer width={180} height={180}>
               <PieChart>
@@ -263,7 +286,7 @@ export default function SprintsPage() {
       </motion.div>
       )}
 
-      {/* Sprint breakdown — only show when there's data */}
+      {/* Sprint breakdown - only show when there's data */}
       {hours.length > 0 && (
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <ChartCard title="Horas por sprint" tag="SPRINT">
@@ -274,10 +297,10 @@ export default function SprintsPage() {
                 <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#999' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 12, fill: '#999' }} axisLine={false} tickLine={false} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="implementacion" name="Implementación" stackId="a" fill="#D2262C" />
+                <Bar dataKey="implementacion" name="Implementacion" stackId="a" fill="#D2262C" />
                 <Bar dataKey="soporte" name="Soporte" stackId="a" fill="#0EA5E9" />
                 <Bar dataKey="mantenimiento" name="Mantenimiento" stackId="a" fill="#8B5CF6" />
-                <Bar dataKey="deuda_tecnica" name="Deuda Técnica" stackId="a" fill="#F59E0B" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="deuda_tecnica" name="Deuda Tecnica" stackId="a" fill="#F59E0B" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -412,3 +435,4 @@ export default function SprintsPage() {
     </motion.div>
   )
 }
+
