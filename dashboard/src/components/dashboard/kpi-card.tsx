@@ -31,7 +31,7 @@ export function KPICard({ value, label, subtitle, accentColor, icon }: KPICardPr
         </div>
         {subtitle && (
           <span
-            className="text-xs font-mono font-semibold px-2.5 py-1 rounded-lg"
+            className="text-[10px] sm:text-xs font-mono font-semibold px-2 py-1 rounded-lg truncate max-w-[100px]"
             style={{ backgroundColor: `${accentColor}10`, color: accentColor }}
           >
             {subtitle}
@@ -39,10 +39,10 @@ export function KPICard({ value, label, subtitle, accentColor, icon }: KPICardPr
         )}
       </div>
 
-      <div className="font-mono text-[28px] font-bold tracking-tight leading-none" style={{ color: accentColor }}>
+      <div className="font-mono text-xl sm:text-2xl lg:text-[28px] font-bold tracking-tight leading-none truncate" style={{ color: accentColor }}>
         {value}
       </div>
-      <div className="text-[11px] font-medium text-text-tertiary uppercase tracking-[0.08em] mt-1.5">
+      <div className="text-[10px] sm:text-[11px] font-medium text-text-tertiary uppercase tracking-[0.08em] mt-1.5 truncate">
         {label}
       </div>
     </motion.div>

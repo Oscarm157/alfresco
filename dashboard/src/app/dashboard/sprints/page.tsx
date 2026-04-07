@@ -208,11 +208,12 @@ export default function SprintsPage() {
         />
       </motion.div>
 
-      {/* Charts Row */}
+      {/* Charts Row — only show when there's data */}
+      {hours.length > 0 && (
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         {/* Hours by day */}
         <ChartCard title="Horas por día" tag="DETALLE">
-          <div className="h-[240px]">
+          <div className="w-full h-[240px]">
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={stats.byDay}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
@@ -258,11 +259,13 @@ export default function SprintsPage() {
           </div>
         </ChartCard>
       </motion.div>
+      )}
 
-      {/* Sprint breakdown */}
+      {/* Sprint breakdown — only show when there's data */}
+      {hours.length > 0 && (
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <ChartCard title="Horas por sprint" tag="SPRINT">
-          <div className="h-[240px]">
+          <div className="w-full h-[240px]">
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={sprintBarData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
@@ -325,6 +328,7 @@ export default function SprintsPage() {
           )}
         </ChartCard>
       </motion.div>
+      )}
 
       {/* Detailed hours table */}
       <motion.div variants={itemVariants}>
