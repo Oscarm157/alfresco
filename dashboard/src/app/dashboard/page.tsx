@@ -7,7 +7,6 @@ import {
   PieChart, Pie, Cell, Legend,
   CartesianGrid
 } from 'recharts'
-import { ClipboardList, CheckCircle2, Clock, XCircle, Timer } from 'lucide-react'
 import { useTickets } from '@/hooks/use-tickets'
 import { useStats } from '@/hooks/use-stats'
 import { FilterBar } from '@/components/layout/filter-bar'
@@ -76,7 +75,7 @@ export default function DashboardPage() {
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className={`transition-opacity duration-300 ${refreshing ? 'opacity-60' : 'opacity-100'}`}>
       {/* Header */}
-      <motion.div variants={itemVariants} className="mb-6 flex items-end justify-between">
+      <motion.div variants={itemVariants} className="mb-5 flex items-end justify-between">
         <div>
           <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-[0.18em] mb-1">Panel de control · Grupo ATISA</p>
           <div className="flex items-center gap-2.5">
@@ -86,7 +85,7 @@ export default function DashboardPage() {
             </h1>
           </div>
         </div>
-        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#F8F8F9]">
+        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface">
           <div className="w-1.5 h-1.5 rounded-full bg-resolved animate-pulse" />
           <span className="text-xs font-mono font-bold text-text-primary">{stats.total}</span>
           <span className="text-[10px] text-text-tertiary">tickets</span>
@@ -98,59 +97,56 @@ export default function DashboardPage() {
         <FilterBar filters={filters} onFiltersChange={setFilters} />
       </motion.div>
 
-      {/* KPI Row */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-6 overflow-hidden">
-        <KPICard
-          value={stats.total}
-          label="Tickets totales"
-          accentColor="#0EA5E9"
-          icon={<ClipboardList size={18} />}
-          sparkline={stats.sparklines.total}
-          delta={stats.deltas.total}
-        />
-        <KPICard
-          value={stats.resueltos}
-          label="Resueltos"
-          subtitle={`${stats.resolutionRate.toFixed(1)}%`}
-          accentColor="#10B981"
-          icon={<CheckCircle2 size={18} />}
-          sparkline={stats.sparklines.resueltos}
-          delta={stats.deltas.resueltos}
-        />
-        <KPICard
-          value={stats.pendientes}
-          label="Pendientes"
-          subtitle={stats.total > 0 ? `${((stats.pendientes / stats.total) * 100).toFixed(1)}%` : '0%'}
-          accentColor="#F59E0B"
-          icon={<Clock size={18} />}
-          sparkline={stats.sparklines.pendientes}
-          delta={stats.deltas.pendientes}
-          invertDelta
-        />
-        <KPICard
-          value={stats.cancelados}
-          label="Cancelados"
-          subtitle={stats.total > 0 ? `${((stats.cancelados / stats.total) * 100).toFixed(1)}%` : '0%'}
-          accentColor="#EF4444"
-          icon={<XCircle size={18} />}
-          sparkline={stats.sparklines.cancelados}
-          delta={stats.deltas.cancelados}
-          invertDelta
-        />
-        <KPICard
-          value={formatResolutionTime(stats.avgResolutionMinutes)}
-          label="Tiempo prom. resolución"
-          subtitle={`mediana ${formatResolutionTime(stats.medianResolutionMinutes)}`}
-          accentColor="#8B5CF6"
-          icon={<Timer size={18} />}
-          sparkline={stats.sparklines.avgTime}
-          delta={stats.deltas.avgTime}
-          invertDelta
-        />
+      {/* KPI Row — unified strip */}
+      <motion.div variants={itemVariants} className="bg-white rounded-xl overflow-hidden mb-5" style={{ boxShadow: 'var(--shadow-sm)' }}>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 divide-x divide-gray-100">
+          <KPICard
+            value={stats.total}
+            label="Tickets totales"
+            accentColor="#0EA5E9"
+            sparkline={stats.sparklines.total}
+            delta={stats.deltas.total}
+          />
+          <KPICard
+            value={stats.resueltos}
+            label="Resueltos"
+            subtitle={`${stats.resolutionRate.toFixed(1)}%`}
+            accentColor="#10B981"
+            sparkline={stats.sparklines.resueltos}
+            delta={stats.deltas.resueltos}
+          />
+          <KPICard
+            value={stats.pendientes}
+            label="Pendientes"
+            subtitle={stats.total > 0 ? `${((stats.pendientes / stats.total) * 100).toFixed(1)}%` : '0%'}
+            accentColor="#F59E0B"
+            sparkline={stats.sparklines.pendientes}
+            delta={stats.deltas.pendientes}
+            invertDelta
+          />
+          <KPICard
+            value={stats.cancelados}
+            label="Cancelados"
+            subtitle={stats.total > 0 ? `${((stats.cancelados / stats.total) * 100).toFixed(1)}%` : '0%'}
+            accentColor="#EF4444"
+            sparkline={stats.sparklines.cancelados}
+            delta={stats.deltas.cancelados}
+            invertDelta
+          />
+          <KPICard
+            value={formatResolutionTime(stats.avgResolutionMinutes)}
+            label="Tiempo prom. resolución"
+            subtitle={`mediana ${formatResolutionTime(stats.medianResolutionMinutes)}`}
+            accentColor="#8B5CF6"
+            sparkline={stats.sparklines.avgTime}
+            delta={stats.deltas.avgTime}
+            invertDelta
+          />
+        </div>
       </motion.div>
 
       {/* Charts Row 1 */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
         {/* Timeline */}
         <ChartCard title="Tickets por día" tag="TIMELINE">
           <div className="h-[240px]">
@@ -207,7 +203,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* Charts Row 2 */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
         {/* Weekly */}
         <ChartCard title="Tickets por semana" tag="SEMANAL">
           <div className="h-[240px]">
@@ -251,7 +247,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* Bottom Row */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* By Requester */}
         <ChartCard title="Tickets por solicitante">
           <div className="space-y-3">
@@ -280,45 +276,83 @@ export default function DashboardPage() {
 
         {/* Priority Distribution */}
         <ChartCard title="Distribución por prioridad">
-          <div className="flex gap-3 mt-2">
-            {[
+          {(() => {
+            const priorities = [
               { label: 'Normal', value: stats.byPriority['normal'] || 0, color: '#94A3B8' },
               { label: 'Alta', value: stats.byPriority['alta'] || 0, color: '#F59E0B' },
               { label: 'Urgente', value: stats.byPriority['urgente'] || 0, color: '#EF4444' },
-            ].map((p) => (
-              <div key={p.label} className="flex-1 text-center py-4 rounded-xl bg-surface">
-                <div className="font-mono text-2xl font-bold" style={{ color: p.color }}>{p.value}</div>
-                <div className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider mt-1">{p.label}</div>
+            ]
+            const total = priorities.reduce((s, p) => s + p.value, 0) || 1
+            return (
+              <div>
+                {/* Stacked bar */}
+                <div className="flex h-3 rounded-full overflow-hidden mb-4">
+                  {priorities.map((p) => (
+                    <div
+                      key={p.label}
+                      className="transition-all duration-500"
+                      style={{ width: `${(p.value / total) * 100}%`, backgroundColor: p.color }}
+                    />
+                  ))}
+                </div>
+                {/* Labels */}
+                <div className="flex justify-between">
+                  {priorities.map((p) => (
+                    <div key={p.label} className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: p.color }} />
+                      <span className="font-mono text-lg font-bold" style={{ color: p.color }}>{p.value}</span>
+                      <span className="text-[11px] text-text-tertiary font-medium">{p.label}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
+            )
+          })()}
         </ChartCard>
 
         {/* Resolution Times */}
         <ChartCard title="Tiempos de resolución">
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { label: 'Más rápido', value: stats.minResolutionMinutes, color: '#10B981' },
-              { label: 'Más lento', value: stats.maxResolutionMinutes, color: '#EF4444' },
-              { label: 'Promedio', value: stats.avgResolutionMinutes, color: '#8B5CF6' },
-              { label: 'Mediana', value: stats.medianResolutionMinutes, color: '#0EA5E9' },
-            ].map((t) => (
-              <div key={t.label}>
-                <div className="text-[11px] text-text-tertiary mb-1">{t.label}</div>
-                <div className="font-mono text-xl font-bold" style={{ color: t.color }}>
-                  {formatResolutionTime(t.value)}
+          {(() => {
+            const range = stats.maxResolutionMinutes - stats.minResolutionMinutes || 1
+            const avgPos = ((stats.avgResolutionMinutes - stats.minResolutionMinutes) / range) * 100
+            const medPos = ((stats.medianResolutionMinutes - stats.minResolutionMinutes) / range) * 100
+            return (
+              <div>
+                {/* Visual range bar */}
+                <div className="relative h-2 bg-surface rounded-full mb-2 mt-1">
+                  <div className="absolute inset-y-0 left-0 right-0 rounded-full bg-gradient-to-r from-[#10B981] via-[#8B5CF6] to-[#EF4444] opacity-30" />
+                  <div className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[#8B5CF6] border-2 border-white" style={{ left: `${Math.min(avgPos, 95)}%` }} title="Promedio" />
+                  <div className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[#0EA5E9] border-2 border-white" style={{ left: `${Math.min(medPos, 95)}%` }} title="Mediana" />
+                </div>
+                <div className="flex justify-between text-[10px] text-text-tertiary mb-4">
+                  <span>{formatResolutionTime(stats.minResolutionMinutes)}</span>
+                  <span>{formatResolutionTime(stats.maxResolutionMinutes)}</span>
+                </div>
+                {/* Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: 'Más rápido', value: stats.minResolutionMinutes, color: '#10B981' },
+                    { label: 'Más lento', value: stats.maxResolutionMinutes, color: '#EF4444' },
+                    { label: 'Promedio', value: stats.avgResolutionMinutes, color: '#8B5CF6' },
+                    { label: 'Mediana', value: stats.medianResolutionMinutes, color: '#0EA5E9' },
+                  ].map((t) => (
+                    <div key={t.label}>
+                      <div className="text-[11px] text-text-tertiary mb-0.5">{t.label}</div>
+                      <div className="font-mono text-lg font-bold" style={{ color: t.color }}>
+                        {formatResolutionTime(t.value)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 pt-3 border-t border-gray-100 text-[12px]">
+                  <span className="font-mono font-semibold text-text-primary">
+                    {tickets.filter(t => t.resolution_time_minutes && t.resolution_time_minutes > 0).length}
+                  </span>
+                  <span className="text-text-tertiary ml-1">de {stats.resueltos} resueltos con tiempo</span>
                 </div>
               </div>
-            ))}
-          </div>
-          <div className="mt-4 pt-3.5 bg-surface rounded-lg -mx-2 px-2 py-2">
-            <span className="font-mono font-semibold text-text-primary">
-              {tickets.filter(t => t.resolution_time_minutes && t.resolution_time_minutes > 0).length}
-            </span>
-            <span className="text-xs text-text-tertiary ml-1.5">
-              de {stats.resueltos} resueltos con tiempo
-            </span>
-          </div>
+            )
+          })()}
         </ChartCard>
       </motion.div>
     </motion.div>

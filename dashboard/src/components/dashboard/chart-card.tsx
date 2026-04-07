@@ -15,12 +15,13 @@ export function ChartCard({ title, tag, children, className = '' }: ChartCardPro
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-      className={`bg-white rounded-2xl p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)] ${className}`}
+      className={`bg-white rounded-xl p-5 ${className}`}
+      style={{ boxShadow: 'var(--shadow-sm)' }}
     >
-      <div className="flex items-center gap-2.5 mb-5">
-        <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
+      <div className="flex items-center gap-2.5 mb-4">
+        <h3 className="text-[15px] font-semibold text-text-primary">{title}</h3>
         {tag && (
-          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md bg-surface text-text-tertiary uppercase tracking-wider">
+          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md border border-gray-200 text-text-secondary uppercase tracking-wider">
             {tag}
           </span>
         )}

@@ -190,27 +190,23 @@ export default function SprintsPage() {
           label="Horas totales"
           subtitle={`${hours.length} registros`}
           accentColor="#383838"
-          icon={<Clock size={18} />}
         />
         <KPICard
           value={`${stats.hoursWithoutDebt}h`}
           label="Horas contractuales"
           subtitle={`de ${stats.quotaHours}h`}
           accentColor={quotaPercent > 100 ? '#EF4444' : '#10B981'}
-          icon={<Target size={18} />}
         />
         <KPICard
           value={`${totalDevSP}/${totalDevSPCommitted}`}
           label="SP Desarrollo"
           subtitle={sprints.length > 0 ? `${sprints.length} sprints` : 'Sin sprints'}
           accentColor="#D2262C"
-          icon={<Zap size={18} />}
         />
         <KPICard
           value={`${totalMaintSP}/${totalMaintSPCommitted}`}
           label="SP Mantenimiento"
           accentColor="#8B5CF6"
-          icon={<Zap size={18} />}
         />
       </motion.div>
 
