@@ -32,11 +32,12 @@ export function useTickets(filters: TicketFilters) {
     try {
       const qs = buildQueryString(filters)
       const res = await fetch(`/api/tickets?${qs}`)
-      if (!res.ok) throw new Error('Error fetching tickets')
+      if (!res.ok) throw new Error('No se pudieron cargar los tickets')
       const data = await res.json()
       setTickets(data)
     } catch (err) {
-      setError(String(err))
+      setError(err instanceof Error ? err.message : 'No se pudieron cargar los tickets')
+      setTickets([])
     } finally {
       setInitialLoading(false)
       setRefreshing(false)

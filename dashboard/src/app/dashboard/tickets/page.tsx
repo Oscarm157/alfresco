@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
@@ -25,7 +25,7 @@ const STATUS_TABS: { value: TicketStatus; label: string; color: string; icon: Re
 ]
 
 function formatDescription(text: string | null): React.ReactNode {
-  if (!text) return <span className="text-text-tertiary">Sin descripción</span>
+  if (!text) return <span className="text-text-tertiary">Sin descripcion</span>
 
   // Split into paragraphs by double newlines or single newlines
   const paragraphs = text.split(/\n\s*\n|\n/).filter(p => p.trim())
@@ -36,7 +36,7 @@ function formatDescription(text: string | null): React.ReactNode {
         const trimmed = para.trim()
 
         // Email-style headers (Documento:, Periodo:, Fecha:, Motivo:, etc.)
-        const kvMatch = trimmed.match(/^(Documento|Periodo|Fecha|Motivo del rechazo|Motivo|Estado|Valor fuente|Valor objetivo|Subcontratista|Obra|Documentos|Próximos pasos):\s*(.+)/i)
+        const kvMatch = trimmed.match(/^(Documento|Periodo|Fecha|Motivo del rechazo|Motivo|Estado|Valor fuente|Valor objetivo|Subcontratista|Obra|Documentos|Proximos pasos):\s*(.+)/i)
         if (kvMatch) {
           const [, key, val] = kvMatch
           const isStatus = /estado/i.test(key)
@@ -52,7 +52,7 @@ function formatDescription(text: string | null): React.ReactNode {
         }
 
         // Section-like headers (all caps or ending with colon, short)
-        if ((trimmed.endsWith(':') && trimmed.length < 60) || /^(Resumen|Detalles|Métricas|Próximos pasos)/i.test(trimmed)) {
+        if ((trimmed.endsWith(':') && trimmed.length < 60) || /^(Resumen|Detalles|Metricas|Proximos pasos)/i.test(trimmed)) {
           return (
             <div key={i} className="text-[11px] font-bold text-text-secondary uppercase tracking-wider mt-1">
               {trimmed.replace(/:$/, '')}
@@ -84,7 +84,7 @@ function formatDescription(text: string | null): React.ReactNode {
           return <div key={i} className="text-[11px] text-text-tertiary italic">{trimmed}</div>
         }
 
-        // URLs — make them clickable
+        // URLs - make them clickable
         if (/https?:\/\/\S+/.test(trimmed)) {
           const parts = trimmed.split(/(https?:\/\/\S+)/)
           return (
@@ -156,7 +156,7 @@ export default function TicketsPage() {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
-          onClick={() => toast.info('Formulario de creación de tickets próximamente')}
+          onClick={() => toast.info('Formulario de creacion de tickets proximamente')}
           className="flex items-center gap-2 px-5 h-10 rounded-lg bg-atisa text-white text-[13px] font-semibold shadow-[0_2px_8px_rgba(210,38,44,0.25)] hover:bg-atisa-hover transition-colors"
         >
           <Plus size={16} />
@@ -200,7 +200,7 @@ export default function TicketsPage() {
         <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-tertiary" />
         <input
           type="text"
-          placeholder="Buscar por orden, solicitante o descripción..."
+          placeholder="Buscar por orden, solicitante o descripcion..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full h-10 pl-10 pr-4 rounded-lg bg-surface text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-atisa/15"
@@ -216,7 +216,7 @@ export default function TicketsPage() {
         <div className="text-center py-16 bg-white rounded-xl" style={{ boxShadow: 'var(--shadow-sm)' }}>
           <Search size={32} className="mx-auto text-text-tertiary mb-2" />
           <p className="text-base font-medium text-text-primary mb-0.5">Sin resultados</p>
-          <p className="text-[13px] text-text-tertiary">Ajusta los filtros o busca otro término</p>
+          <p className="text-[13px] text-text-tertiary">Ajusta los filtros o busca otro termino</p>
         </div>
       ) : (
         <motion.div variants={itemVariants} className="space-y-2">
@@ -230,7 +230,7 @@ export default function TicketsPage() {
                 className="bg-white rounded-xl overflow-hidden transition-shadow"
                 style={{ boxShadow: 'var(--shadow-sm)' }}
               >
-                {/* Row header — always visible */}
+                {/* Row header - always visible */}
                 <div
                   className={`flex items-start gap-4 px-4 py-3.5 ${isLong ? 'cursor-pointer hover:bg-surface/30' : ''}`}
                   onClick={() => isLong && setExpandedId(isExpanded ? null : ticket.id)}
@@ -260,7 +260,7 @@ export default function TicketsPage() {
                     {isLong && !isExpanded
                       ? `${ticket.description?.slice(0, 120)}...`
                       : !isLong
-                        ? ticket.description || 'Sin descripción'
+                        ? ticket.description || 'Sin descripcion'
                         : null
                     }
                   </span>
@@ -310,3 +310,4 @@ export default function TicketsPage() {
     </motion.div>
   )
 }
+

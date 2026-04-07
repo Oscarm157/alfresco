@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo } from 'react'
 import { motion } from 'motion/react'
@@ -47,7 +47,7 @@ export default function ComparePage() {
     { label: 'Resueltos', a: statsA.resueltos, b: statsB.resueltos },
     { label: 'Pendientes', a: statsA.pendientes, b: statsB.pendientes, invert: true },
     { label: 'Cancelados', a: statsA.cancelados, b: statsB.cancelados, invert: true },
-    { label: 'Tasa resolución', a: Math.round(statsA.resolutionRate), b: Math.round(statsB.resolutionRate), suffix: '%' },
+    { label: 'Tasa resolucion', a: Math.round(statsA.resolutionRate), b: Math.round(statsB.resolutionRate), suffix: '%' },
     { label: 'Tiempo prom.', a: statsA.avgResolutionMinutes, b: statsB.avgResolutionMinutes, invert: true, formatFn: formatResolutionTime },
   ]
 
@@ -95,3 +95,4 @@ export default function ComparePage() {
     </div>
   )
 }
+

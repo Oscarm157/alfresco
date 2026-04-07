@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx'
+﻿import * as XLSX from 'xlsx'
 import { parseSpanishDate, normalizeStatus, normalizePriority, parseResolutionTime } from './utils'
 import type { ImportRow } from './types'
 
@@ -11,9 +11,9 @@ const COLUMN_MAP: Record<string, string> = {
   'estado': 'status',
   'fecha': 'created_at',
   'prioridad': 'priority',
-  'técnico': 'technician',
   'tecnico': 'technician',
-  'solicitó': 'requester',
+  'tecnico': 'technician',
+  'solicito': 'requester',
   'solicito': 'requester',
   'reporte': 'description',
   'tipo de servicio': 'service_type',
@@ -69,20 +69,20 @@ export function transformRows(rows: RawRow[], mapping: Record<string, string>): 
 
       const orderNum = parseInt(get('order_number'))
       if (isNaN(orderNum)) {
-        errors.push({ row: i + 1, error: 'Número de orden inválido' })
+        errors.push({ row: i + 1, error: 'Numero de orden invalido' })
         continue
       }
 
       const dateStr = get('created_at')
       const parsedDate = parseSpanishDate(dateStr)
       if (!parsedDate) {
-        errors.push({ row: i + 1, error: `Fecha inválida: ${dateStr}` })
+        errors.push({ row: i + 1, error: `Fecha invalida: ${dateStr}` })
         continue
       }
 
       const requester = get('requester')
       if (!requester) {
-        errors.push({ row: i + 1, error: 'Solicitante vacío' })
+        errors.push({ row: i + 1, error: 'Solicitante vacio' })
         continue
       }
 
@@ -109,3 +109,4 @@ export function transformRows(rows: RawRow[], mapping: Record<string, string>): 
 
   return { valid, errors }
 }
+
