@@ -112,7 +112,7 @@ export default function TicketImportPage() {
                 Arrastra tu archivo aqui
               </p>
               <p className="text-sm text-text-tertiary">
-                o haz click para seleccionar · .xlsx, .xls, .csv
+                o haz click para seleccionar: .xlsx, .xls, .csv
               </p>
             </div>
           </motion.div>
