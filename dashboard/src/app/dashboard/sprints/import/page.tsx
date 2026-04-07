@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
@@ -35,6 +35,11 @@ export default function SprintImportPage() {
   }, [handleFile])
 
   const handleImport = async () => {
+    if (validRows.length === 0) {
+      toast.error('No hay registros validos para importar')
+      return
+    }
+
     setStep('importing')
     try {
       const res = await fetch('/api/sprints/hours', {
@@ -43,12 +48,12 @@ export default function SprintImportPage() {
         body: JSON.stringify({ rows: validRows }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
+      if (!res.ok) throw new Error(data.error || 'No se pudieron importar los registros')
       setImportResult(data)
       setStep('done')
       toast.success(`${data.imported} registros importados`)
     } catch (err) {
-      toast.error('Error: ' + String(err))
+      toast.error(err instanceof Error ? err.message : 'No se pudieron importar los registros')
       setStep('preview')
     }
   }
@@ -167,7 +172,7 @@ export default function SprintImportPage() {
         {step === 'done' && (
           <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-20">
             <CheckCircle2 size={48} className="mx-auto text-resolved mb-4" />
-            <p className="text-xl font-heading font-bold text-text-primary mb-2">¡Importación completada!</p>
+            <p className="text-xl font-heading font-bold text-text-primary mb-2">Importacion completada!</p>
             <p className="text-text-tertiary mb-6">{importResult?.imported} registros importados</p>
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={reset}
               className="px-8 h-12 rounded-xl bg-atisa text-white text-sm font-semibold shadow-[0_4px_14px_rgba(210,38,44,0.3)]">
@@ -179,3 +184,4 @@ export default function SprintImportPage() {
     </div>
   )
 }
+

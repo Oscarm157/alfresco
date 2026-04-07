@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useMemo } from 'react'
 import { format, startOfWeek, getWeek } from 'date-fns'
@@ -46,7 +46,7 @@ export function useStats(tickets: Ticket[]): TicketStats {
     // By category
     const byCategory: Record<string, number> = {}
     tickets.forEach(t => {
-      const cat = t.category || 'Sin categoría'
+      const cat = t.category || 'Sin categoria'
       byCategory[cat] = (byCategory[cat] || 0) + 1
     })
 
@@ -150,3 +150,4 @@ export function useStats(tickets: Ticket[]): TicketStats {
     }
   }, [tickets])
 }
+

@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx'
+﻿import * as XLSX from 'xlsx'
 import { normalizeTaskType } from './sprint-types'
 import type { TaskType } from './sprint-types'
 import { format } from 'date-fns'
@@ -41,7 +41,7 @@ export function parseSprintExcel(buffer: ArrayBuffer): { rows: SprintImportRow[]
 
       const sprint = String(raw['Sprint'] || '').trim()
       if (!sprint) {
-        errors.push({ row: i + 2, error: 'Sprint vacío' })
+        errors.push({ row: i + 2, error: 'Sprint vacio' })
         continue
       }
 
@@ -63,7 +63,7 @@ export function parseSprintExcel(buffer: ArrayBuffer): { rows: SprintImportRow[]
       }
 
       if (hours <= 0) {
-        errors.push({ row: i + 2, error: 'Tiempo inválido' })
+        errors.push({ row: i + 2, error: 'Tiempo invalido' })
         continue
       }
 
@@ -80,3 +80,4 @@ export function parseSprintExcel(buffer: ArrayBuffer): { rows: SprintImportRow[]
 
   return { rows, errors }
 }
+

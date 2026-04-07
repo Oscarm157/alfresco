@@ -1,4 +1,4 @@
-export const STATUS_OPTIONS = [
+﻿export const STATUS_OPTIONS = [
   { value: 'pendiente', label: 'Pendiente', color: '#F59E0B' },
   { value: 'resuelto', label: 'Resuelto', color: '#10B981' },
   { value: 'cancelado', label: 'Cancelado', color: '#EF4444' },
@@ -17,10 +17,10 @@ export const RESOLVED_BY_OPTIONS = [
 ] as const
 
 export const CATEGORY_OPTIONS = [
-  { value: 'validacion_docs', label: 'Validación de documentos' },
-  { value: 'gestion_docs', label: 'Gestión de documentos' },
+  { value: 'validacion_docs', label: 'Validacion de documentos' },
+  { value: 'gestion_docs', label: 'Gestion de documentos' },
   { value: 'altas_registros', label: 'Altas y registros' },
-  { value: 'accesos', label: 'Accesos y contraseñas' },
+  { value: 'accesos', label: 'Accesos y contrasenas' },
   { value: 'matriz_kpi', label: 'Matriz / KPI' },
   { value: 'notificaciones', label: 'Notificaciones' },
   { value: 'otro', label: 'Otro' },
@@ -30,6 +30,7 @@ export const DATE_PRESETS = [
   { label: 'Esta semana', value: 'this_week' },
   { label: 'Este mes', value: 'this_month' },
   { label: 'Mes pasado', value: 'last_month' },
-  { label: 'Últimos 3 meses', value: 'last_3_months' },
+  { label: 'Ultimos 3 meses', value: 'last_3_months' },
   { label: 'Todo', value: 'all' },
 ] as const
+
