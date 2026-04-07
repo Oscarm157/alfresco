@@ -27,65 +27,83 @@ const STATUS_TABS: { value: TicketStatus; label: string; color: string; icon: Re
 function formatDescription(text: string | null): React.ReactNode {
   if (!text) return <span className="text-text-tertiary">Sin descripción</span>
 
-  // Split by common patterns that indicate structure
-  const lines = text
-    .replace(/- Regla:/g, '\n- Regla:')
-    .replace(/- Estado:/g, '\n  Estado:')
-    .replace(/Estado:/g, '\nEstado:')
-    .replace(/Motivo:/g, '\nMotivo:')
-    .replace(/Valor fuente:/g, '\nValor fuente:')
-    .replace(/Valor objetivo:/g, '\nValor objetivo:')
-    .replace(/Resumen de validaciones:/g, '\nResumen de validaciones:')
-    .replace(/Detalles de validaciones:/g, '\n\nDetalles de validaciones:')
-    .replace(/Métricas \(estructura completa\):/g, '\n\nMétricas:')
-    .replace(/• /g, '\n  • ')
-    .replace(/ - Total/g, '\n  - Total')
-    .replace(/ - Pasaron/g, '\n  - Pasaron')
-    .replace(/ - Fallaron/g, '\n  - Fallaron')
-    .replace(/ - Alertas/g, '\n  - Alertas')
-    .split('\n')
-    .filter(l => l.trim())
+  // Split into paragraphs by double newlines or single newlines
+  const paragraphs = text.split(/\n\s*\n|\n/).filter(p => p.trim())
 
   return (
-    <div className="space-y-1">
-      {lines.map((line, i) => {
-        const trimmed = line.trim()
+    <div className="space-y-2.5">
+      {paragraphs.map((para, i) => {
+        const trimmed = para.trim()
 
-        // Section headers
-        if (trimmed.startsWith('Resumen de validaciones') || trimmed.startsWith('Detalles de validaciones') || trimmed.startsWith('Métricas')) {
-          return <div key={i} className="text-[11px] font-bold text-text-secondary uppercase tracking-wider mt-2 mb-1">{trimmed}</div>
-        }
-
-        // Rules
-        if (trimmed.startsWith('- Regla:')) {
-          return <div key={i} className="text-[12px] text-text-primary font-medium mt-2 pl-2 border-l-2 border-atisa/20">{trimmed.replace('- Regla: ', '')}</div>
-        }
-
-        // Key-value fields (Estado, Motivo, Valor)
-        const kvMatch = trimmed.match(/^(Estado|Motivo|Valor fuente|Valor objetivo):\s*(.*)/)
+        // Email-style headers (Documento:, Periodo:, Fecha:, Motivo:, etc.)
+        const kvMatch = trimmed.match(/^(Documento|Periodo|Fecha|Motivo del rechazo|Motivo|Estado|Valor fuente|Valor objetivo|Subcontratista|Obra|Documentos|Próximos pasos):\s*(.+)/i)
         if (kvMatch) {
           const [, key, val] = kvMatch
-          const isStatus = key === 'Estado'
-          const statusColor = val === 'passed' ? '#10B981' : val === 'missing_info' ? '#F59E0B' : '#999'
+          const isStatus = /estado/i.test(key)
+          const statusColor = /passed|aprobado/i.test(val) ? '#10B981' : /missing|rechaz|fallaron/i.test(val) ? '#EF4444' : /pendiente|alerta/i.test(val) ? '#F59E0B' : undefined
           return (
-            <div key={i} className="flex gap-2 text-[12px] pl-4">
-              <span className="text-text-tertiary font-medium min-w-[90px]">{key}:</span>
-              {isStatus ? (
-                <span className="font-mono font-semibold" style={{ color: statusColor }}>{val}</span>
-              ) : (
-                <span className="text-text-secondary">{val}</span>
-              )}
+            <div key={i} className="flex gap-2 text-[12px]">
+              <span className="text-text-tertiary font-semibold min-w-[120px] shrink-0">{key}:</span>
+              <span className={isStatus && statusColor ? 'font-mono font-semibold' : 'text-text-primary'} style={statusColor ? { color: statusColor } : undefined}>
+                {val}
+              </span>
             </div>
           )
         }
 
-        // Bullets
-        if (trimmed.startsWith('•') || trimmed.startsWith('- ')) {
-          return <div key={i} className="text-[12px] text-text-secondary pl-4">{trimmed}</div>
+        // Section-like headers (all caps or ending with colon, short)
+        if ((trimmed.endsWith(':') && trimmed.length < 60) || /^(Resumen|Detalles|Métricas|Próximos pasos)/i.test(trimmed)) {
+          return (
+            <div key={i} className="text-[11px] font-bold text-text-secondary uppercase tracking-wider mt-1">
+              {trimmed.replace(/:$/, '')}
+            </div>
+          )
         }
 
-        // Default
-        return <div key={i} className="text-[12px] text-text-secondary leading-relaxed">{trimmed}</div>
+        // Bullet lines (•, -, *)
+        if (/^[•\-\*]\s/.test(trimmed)) {
+          return (
+            <div key={i} className="text-[12px] text-text-secondary pl-3 flex gap-1.5">
+              <span className="text-text-tertiary">•</span>
+              <span>{trimmed.replace(/^[•\-\*]\s*/, '')}</span>
+            </div>
+          )
+        }
+
+        // Validation rules (- Regla:)
+        if (/^-?\s*Regla:/i.test(trimmed)) {
+          return (
+            <div key={i} className="text-[12px] text-text-primary font-medium pl-3 border-l-2 border-atisa/20 py-1">
+              {trimmed.replace(/^-?\s*Regla:\s*/i, '')}
+            </div>
+          )
+        }
+
+        // Email signature blocks (Saludos, Grupo ATISA, etc.)
+        if (/^(Saludos|Atentamente|Grupo ATISA)/i.test(trimmed)) {
+          return <div key={i} className="text-[11px] text-text-tertiary italic">{trimmed}</div>
+        }
+
+        // URLs — make them clickable
+        if (/https?:\/\/\S+/.test(trimmed)) {
+          const parts = trimmed.split(/(https?:\/\/\S+)/)
+          return (
+            <p key={i} className="text-[13px] text-text-secondary leading-relaxed">
+              {parts.map((part, j) =>
+                /^https?:\/\//.test(part)
+                  ? <a key={j} href={part} target="_blank" rel="noopener noreferrer" className="text-atisa underline underline-offset-2 font-medium">{part}</a>
+                  : part
+              )}
+            </p>
+          )
+        }
+
+        // Default paragraph
+        return (
+          <p key={i} className="text-[13px] text-text-secondary leading-relaxed">
+            {trimmed}
+          </p>
+        )
       })}
     </div>
   )
