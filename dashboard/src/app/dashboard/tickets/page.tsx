@@ -246,7 +246,7 @@ export default function TicketsPage() {
                   </span>
 
                   {/* Priority */}
-                  <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${getPriorityBadge(ticket.priority)}`}>
+                  <span className={`inline-block w-[70px] text-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${getPriorityBadge(ticket.priority)}`}>
                     {ticket.priority}
                   </span>
 
