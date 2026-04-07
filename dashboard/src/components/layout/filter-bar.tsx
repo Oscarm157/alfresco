@@ -131,7 +131,7 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
           </motion.button>
         )}
 
-        <div className="flex-1" />
+        <div className="hidden lg:flex flex-1" />
 
         {onExportPDF && (
           <button

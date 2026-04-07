@@ -133,7 +133,7 @@ export default function DashboardPage() {
         {/* Timeline */}
         <ChartCard title="Tickets por día" tag="TIMELINE">
           <div className="h-[240px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={240}>
               <BarChart data={stats.byDay}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
                 <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#999' }} axisLine={false} tickLine={false} />
@@ -147,9 +147,9 @@ export default function DashboardPage() {
 
         {/* Donut */}
         <ChartCard title="Tasa de resolución" tag="ESTADO">
-          <div className="flex items-center justify-center gap-8 h-[240px]">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 min-h-[240px]">
             <div className="relative">
-              <ResponsiveContainer width={180} height={180}>
+              <ResponsiveContainer width={180} height={180} minWidth={180}>
                 <PieChart>
                   <Pie
                     data={donutData}
@@ -190,7 +190,7 @@ export default function DashboardPage() {
         {/* Weekly */}
         <ChartCard title="Tickets por semana" tag="SEMANAL">
           <div className="h-[240px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={240}>
               <BarChart data={stats.byWeek}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
                 <XAxis dataKey="week" tick={{ fontSize: 11, fill: '#999' }} axisLine={false} tickLine={false} />
@@ -212,7 +212,7 @@ export default function DashboardPage() {
         {/* Categories */}
         <ChartCard title="Categorización de tickets" tag="TIPO">
           <div className="h-[240px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={240}>
               <BarChart data={categoryData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 12, fill: '#999' }} axisLine={false} tickLine={false} />

@@ -73,7 +73,7 @@ export default function TrendsPage() {
       <div className="grid grid-cols-1 gap-4">
         <ChartCard title="Volumen de tickets" tag="MENSUAL">
           <div className="h-[280px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={monthlyData}>
                 <defs>
                   <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
@@ -95,7 +95,7 @@ export default function TrendsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <ChartCard title="Tasa de resolución" tag="% MENSUAL">
             <div className="h-[240px]">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
                   <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#999' }} axisLine={false} tickLine={false} />
@@ -109,7 +109,7 @@ export default function TrendsPage() {
 
           <ChartCard title="Tiempo promedio de resolución" tag="HORAS">
             <div className="h-[240px]">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={260}>
                 <AreaChart data={monthlyData}>
                   <defs>
                     <linearGradient id="colorTime" x1="0" y1="0" x2="0" y2="1">

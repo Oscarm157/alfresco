@@ -178,7 +178,7 @@ export default function SprintsPage() {
       </motion.div>
 
       {/* KPI Row */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <KPICard
           value={`${stats.totalHours}h`}
           label="Horas totales"
@@ -213,7 +213,7 @@ export default function SprintsPage() {
         {/* Hours by day */}
         <ChartCard title="Horas por día" tag="DETALLE">
           <div className="h-[240px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={240}>
               <BarChart data={stats.byDay}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
                 <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#999' }} axisLine={false} tickLine={false} />
@@ -227,7 +227,7 @@ export default function SprintsPage() {
 
         {/* Type distribution donut */}
         <ChartCard title="Distribución por tipo" tag="TIPO">
-          <div className="flex items-center justify-center gap-8 h-[240px]">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 min-h-[240px]">
             <ResponsiveContainer width={180} height={180}>
               <PieChart>
                 <Pie
@@ -263,7 +263,7 @@ export default function SprintsPage() {
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <ChartCard title="Horas por sprint" tag="SPRINT">
           <div className="h-[240px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={240}>
               <BarChart data={sprintBarData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#999' }} axisLine={false} tickLine={false} />
@@ -338,7 +338,7 @@ export default function SprintsPage() {
             <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-[11px] uppercase tracking-wider text-text-tertiary sticky top-0 bg-white">
+                  <tr className="text-left text-[11px] uppercase tracking-wider text-text-tertiary sticky top-0 bg-white z-10">
                     <th className="py-2.5 px-3 font-semibold">Fecha</th>
                     <th className="py-2.5 px-3 font-semibold">Sprint</th>
                     <th className="py-2.5 px-3 font-semibold">Horas</th>

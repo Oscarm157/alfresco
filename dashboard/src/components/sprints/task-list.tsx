@@ -12,6 +12,7 @@ interface SprintTask {
   title: string
   label: string | null
   status: string
+  priority: string | null
   story_points: number
   assignee: string | null
   sprint_name: string
@@ -35,6 +36,12 @@ const STATUS_OPTIONS = [
   { value: 'completada', label: 'Completada', color: '#10B981' },
 ]
 
+const PRIORITY_OPTIONS = [
+  { value: 'baja', label: 'Baja', color: '#94A3B8' },
+  { value: 'media', label: 'Media', color: '#F59E0B' },
+  { value: 'alta', label: 'Alta', color: '#EF4444' },
+]
+
 interface TaskListProps {
   sprint: Sprint
   tasks: SprintTask[]
@@ -52,6 +59,7 @@ export function TaskList({ sprint, tasks, onRefresh }: TaskListProps) {
     story_points: 0,
     assignee: '',
     status: 'tareas_por_hacer',
+    priority: 'media',
   })
 
   const totalSP = tasks.reduce((a, t) => a + t.story_points, 0)
@@ -76,7 +84,7 @@ export function TaskList({ sprint, tasks, onRefresh }: TaskListProps) {
       })
       if (!res.ok) throw new Error('Error al crear tarea')
       toast.success(`Tarea ${form.jira_key} agregada`)
-      setForm({ jira_key: '', title: '', label: '', story_points: 0, assignee: '', status: 'tareas_por_hacer' })
+      setForm({ jira_key: '', title: '', label: '', story_points: 0, assignee: '', status: 'tareas_por_hacer', priority: 'media' })
       setShowForm(false)
       onRefresh()
     } catch (err) {
@@ -91,11 +99,14 @@ export function TaskList({ sprint, tasks, onRefresh }: TaskListProps) {
     if (res.ok) { toast.success('Tarea eliminada'); onRefresh() }
   }
 
-  const handleStatusChange = async (id: string, status: string) => {
+  const handleStatusChange = async (id: string, status?: string, priority?: string) => {
+    const body: Record<string, string> = {}
+    if (status) body.status = status
+    if (priority) body.priority = priority
     const res = await fetch(`/api/sprints/tasks/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify(body),
     })
     if (res.ok) onRefresh()
   }
@@ -156,19 +167,34 @@ export function TaskList({ sprint, tasks, onRefresh }: TaskListProps) {
                     <span className="font-mono text-sm font-semibold text-atisa min-w-[60px]">{task.jira_key}</span>
 
                     {/* Title */}
-                    <span className="text-sm text-text-primary flex-1 truncate">{task.title}</span>
+                    <span className="text-sm text-text-primary flex-1 truncate" title={task.title}>{task.title}</span>
 
                     {/* Label */}
                     {task.label && (
-                      <span className="text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-atisa/10 text-atisa uppercase tracking-wider hidden lg:block">
+                      <span className="text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-atisa/10 text-atisa uppercase tracking-wider whitespace-nowrap hidden sm:block">
                         {task.label}
                       </span>
                     )}
 
+                    {/* Priority */}
+                    <select
+                      value={task.priority || 'media'}
+                      onChange={(e) => handleStatusChange(task.id, undefined, e.target.value)}
+                      className="h-8 px-2 rounded-lg text-[11px] font-semibold appearance-none cursor-pointer focus:outline-none"
+                      style={{
+                        backgroundColor: `${(PRIORITY_OPTIONS.find(p => p.value === (task.priority || 'media'))?.color || '#F59E0B')}15`,
+                        color: PRIORITY_OPTIONS.find(p => p.value === (task.priority || 'media'))?.color || '#F59E0B',
+                      }}
+                    >
+                      {PRIORITY_OPTIONS.map(p => (
+                        <option key={p.value} value={p.value}>{p.label}</option>
+                      ))}
+                    </select>
+
                     {/* Status select */}
                     <select
                       value={task.status}
-                      onChange={(e) => handleStatusChange(task.id, e.target.value)}
+                      onChange={(e) => handleStatusChange(task.id, e.target.value, undefined)}
                       className="h-8 px-2 rounded-lg text-[11px] font-semibold appearance-none cursor-pointer focus:outline-none"
                       style={{
                         backgroundColor: `${statusOpt?.color}15`,
@@ -211,7 +237,7 @@ export function TaskList({ sprint, tasks, onRefresh }: TaskListProps) {
                 className="px-5 pb-4"
               >
                 <div className="bg-surface-alt rounded-xl p-4">
-                  <div className="grid grid-cols-2 lg:grid-cols-6 gap-2 mb-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 mb-3">
                     <input
                       placeholder="AT-000"
                       value={form.jira_key}

@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'motion/react'
 import { Plus, Search } from 'lucide-react'
+import { toast } from 'sonner'
 import { useTickets } from '@/hooks/use-tickets'
 import { FilterBar } from '@/components/layout/filter-bar'
 import { formatDate, formatResolutionTime, shortenName } from '@/lib/utils'
@@ -75,6 +76,7 @@ export default function TicketsPage() {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
+          onClick={() => toast.info('Formulario de creación de tickets próximamente')}
           className="flex items-center gap-2 px-5 h-12 rounded-xl bg-atisa text-white text-sm font-semibold shadow-[0_4px_14px_rgba(210,38,44,0.3)] hover:bg-atisa-hover transition-colors"
         >
           <Plus size={18} />
@@ -85,7 +87,7 @@ export default function TicketsPage() {
       <FilterBar filters={filters} onFiltersChange={setFilters} />
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-surface-alt rounded-xl p-1 mb-5 w-fit">
+      <div className="flex flex-wrap gap-1 bg-surface-alt rounded-xl p-1 mb-5">
         {STATUS_TABS.map((tab) => (
           <button
             key={tab.value}
@@ -135,13 +137,13 @@ export default function TicketsPage() {
             <table className="w-full">
               <thead>
                 <tr className="text-left text-[11px] uppercase tracking-wider text-text-tertiary bg-surface/50">
-                  <th className="py-3 px-4 font-semibold">Orden</th>
-                  <th className="py-3 px-4 font-semibold">Fecha</th>
-                  <th className="py-3 px-4 font-semibold">Prioridad</th>
-                  <th className="py-3 px-4 font-semibold">Solicitó</th>
-                  <th className="py-3 px-4 font-semibold">Descripción</th>
-                  <th className="py-3 px-4 font-semibold">Tiempo</th>
-                  <th className="py-3 px-4 font-semibold">Resuelto por</th>
+                  <th className="py-3 px-4 font-semibold min-w-[80px]">Orden</th>
+                  <th className="py-3 px-4 font-semibold min-w-[80px]">Fecha</th>
+                  <th className="py-3 px-4 font-semibold min-w-[90px]">Prioridad</th>
+                  <th className="py-3 px-4 font-semibold min-w-[110px]">Solicitó</th>
+                  <th className="py-3 px-4 font-semibold min-w-[200px]">Descripción</th>
+                  <th className="py-3 px-4 font-semibold min-w-[80px]">Tiempo</th>
+                  <th className="py-3 px-4 font-semibold min-w-[100px]">Resuelto por</th>
                 </tr>
               </thead>
               <tbody>
@@ -167,7 +169,7 @@ export default function TicketsPage() {
                     <td className="py-3.5 px-4 text-sm text-text-primary">
                       {shortenName(ticket.requester)}
                     </td>
-                    <td className="py-3.5 px-4 text-sm text-text-tertiary max-w-[350px] truncate">
+                    <td className="py-3.5 px-4 text-sm text-text-tertiary max-w-[200px] lg:max-w-[350px] truncate">
                       {ticket.description?.slice(0, 100)}
                     </td>
                     <td className="py-3.5 px-4 font-mono text-sm font-semibold text-escalated">

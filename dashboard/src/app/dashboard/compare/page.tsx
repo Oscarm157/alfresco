@@ -61,8 +61,8 @@ export default function ComparePage() {
       </p>
 
       {/* Header labels */}
-      <div className="grid grid-cols-[200px_1fr_1fr] gap-4 mb-4">
-        <div />
+      <div className="grid grid-cols-1 md:grid-cols-[160px_1fr_1fr] gap-4 mb-4">
+        <div className="hidden md:block" />
         <div className="text-center bg-surface-alt rounded-xl py-3 font-heading font-semibold text-sm text-text-primary capitalize">{labelA}</div>
         <div className="text-center bg-atisa/5 rounded-xl py-3 font-heading font-semibold text-sm text-atisa capitalize">{labelB}</div>
       </div>
@@ -75,7 +75,7 @@ export default function ComparePage() {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="grid grid-cols-[200px_1fr_1fr] gap-4 items-center"
+            className="grid grid-cols-1 md:grid-cols-[160px_1fr_1fr] gap-4 items-center"
           >
             <div className="text-sm font-medium text-text-secondary">{m.label}</div>
             <div className="bg-white rounded-xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)] text-center">
