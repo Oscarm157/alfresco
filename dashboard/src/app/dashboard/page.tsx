@@ -7,6 +7,7 @@ import {
   PieChart, Pie, Cell, Legend,
   CartesianGrid
 } from 'recharts'
+import { CircleHelp } from 'lucide-react'
 import { useTickets } from '@/hooks/use-tickets'
 import { useStats } from '@/hooks/use-stats'
 import { FilterBar } from '@/components/layout/filter-bar'
@@ -14,6 +15,7 @@ import { KPICard } from '@/components/dashboard/kpi-card'
 import { ChartCard } from '@/components/dashboard/chart-card'
 import { formatResolutionTime, shortenName } from '@/lib/utils'
 import type { TicketFilters } from '@/lib/types'
+import { CATEGORY_OPTIONS } from '@/lib/constants'
 
 const containerVariants = {
   hidden: {},
@@ -45,6 +47,7 @@ export default function DashboardPage() {
   const [filters, setFilters] = useState<TicketFilters>({})
   const { tickets, loading, refreshing } = useTickets(filters)
   const stats = useStats(tickets)
+  const categoryLabelMap = Object.fromEntries(CATEGORY_OPTIONS.map((option) => [option.value, option.label]))
 
   const donutData = [
     { name: 'Resueltos', value: stats.resueltos },
@@ -60,7 +63,7 @@ export default function DashboardPage() {
 
   const categoryData = Object.entries(stats.byCategory)
     .sort(([, a], [, b]) => b - a)
-    .map(([name, count]) => ({ name, count }))
+    .map(([name, count]) => ({ name: categoryLabelMap[name] || name, count }))
 
   const CATEGORY_COLORS = ['#D2262C', '#8B5CF6', '#10B981', '#F59E0B', '#0EA5E9', '#94A3B8']
 
@@ -227,7 +230,34 @@ export default function DashboardPage() {
         </ChartCard>
 
         {/* Categories */}
-        <ChartCard title="Categorización de tickets" tag="TIPO">
+        <ChartCard
+          title="Categorización de tickets"
+          tag="TIPO"
+          titleAddon={(
+            <div className="group relative">
+              <button
+                type="button"
+                className="flex h-6 w-6 items-center justify-center rounded-full text-text-tertiary transition-colors hover:bg-surface hover:text-text-primary"
+                aria-label="Ver definición de categorías"
+              >
+                <CircleHelp size={14} />
+              </button>
+              <div className="pointer-events-none absolute left-0 top-8 z-20 hidden w-[320px] rounded-xl bg-[#383838] p-3 text-white shadow-lg group-hover:block">
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
+                  Qué engloba cada categoría
+                </div>
+                <div className="space-y-2">
+                  {CATEGORY_OPTIONS.map((category) => (
+                    <div key={category.value}>
+                      <div className="text-xs font-semibold">{category.label}</div>
+                      <div className="text-[11px] leading-relaxed text-white/75">{category.description}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        >
           <div className="h-[240px]">
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={categoryData} layout="vertical">

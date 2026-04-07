@@ -5,11 +5,12 @@ import { motion } from 'motion/react'
 interface ChartCardProps {
   title: string
   tag?: string
+  titleAddon?: React.ReactNode
   children: React.ReactNode
   className?: string
 }
 
-export function ChartCard({ title, tag, children, className = '' }: ChartCardProps) {
+export function ChartCard({ title, tag, titleAddon, children, className = '' }: ChartCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 14 }}
@@ -25,6 +26,7 @@ export function ChartCard({ title, tag, children, className = '' }: ChartCardPro
             {tag}
           </span>
         )}
+        {titleAddon}
       </div>
       {children}
     </motion.div>

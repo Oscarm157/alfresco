@@ -17,13 +17,36 @@ export const RESOLVED_BY_OPTIONS = [
 ] as const
 
 export const CATEGORY_OPTIONS = [
-  { value: 'validacion_docs', label: 'Validacion de documentos' },
-  { value: 'gestion_docs', label: 'Gestion de documentos' },
-  { value: 'altas_registros', label: 'Altas y registros' },
-  { value: 'accesos', label: 'Accesos y contrasenas' },
-  { value: 'matriz_kpi', label: 'Matriz / KPI' },
-  { value: 'notificaciones', label: 'Notificaciones' },
-  { value: 'otro', label: 'Otro' },
+  {
+    value: 'incidencia_funcional',
+    label: 'Incidencia funcional',
+    description: 'Errores, duplicados, calculos incorrectos, periodos mal abiertos o comportamiento inesperado del sistema.',
+  },
+  {
+    value: 'validacion_documental',
+    label: 'Validacion documental',
+    description: 'Casos ligados a SIROC, SIPARE, CFDI, IMSS, INFONAVIT, RFC y rechazos o validaciones de documentos.',
+  },
+  {
+    value: 'accesos_permisos',
+    label: 'Accesos y permisos',
+    description: 'Altas de usuarios, contrasenas provisionales, permisos especiales y accesos a modulos o secciones.',
+  },
+  {
+    value: 'configuracion',
+    label: 'Configuracion',
+    description: 'Cambios de reglas, catalogos, actividades, limites, periodos y ajustes operativos de la plataforma.',
+  },
+  {
+    value: 'mejora',
+    label: 'Mejora',
+    description: 'Solicitudes para agregar candados, mejorar visualizacion, contexto o experiencia de uso.',
+  },
+  {
+    value: 'consulta_operativa',
+    label: 'Consulta operativa',
+    description: 'Dudas sobre logica de estatus, comportamiento esperado o acompanamiento funcional.',
+  },
 ] as const
 
 export const DATE_PRESETS = [
