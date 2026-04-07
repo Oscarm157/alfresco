@@ -71,11 +71,11 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
   const hasFilters = filters.status || filters.priority || filters.requester || filters.resolvedBy || filters.dateFrom
 
   return (
-    <div className="rounded-2xl p-5 mb-8 bg-[#F8F8F9] space-y-4">
+    <div className="rounded-2xl px-4 py-3.5 mb-6 bg-[#F8F8F9] space-y-3">
       {/* Date presets */}
       <div className="flex flex-wrap items-center gap-2.5">
-        <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.05)] mr-1">
-          <Calendar size={16} className="text-text-secondary" />
+        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+          <Calendar size={14} className="text-text-secondary" />
         </div>
         {DATE_PRESETS.map((preset) => (
           <motion.button
@@ -84,7 +84,7 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.96 }}
             className={`
-              px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-200
+              px-3.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-200
               ${activePreset === preset.value
                 ? 'bg-atisa text-white shadow-[0_4px_16px_rgba(210,38,44,0.35)]'
                 : 'bg-white text-text-secondary hover:text-text-primary shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)]'
@@ -101,8 +101,8 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
 
       {/* Filter dropdowns */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.05)] mr-1">
-          <SlidersHorizontal size={16} className="text-text-secondary" />
+        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+          <SlidersHorizontal size={14} className="text-text-secondary" />
         </div>
 
         <FilterSelect
