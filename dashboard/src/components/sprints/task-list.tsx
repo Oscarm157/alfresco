@@ -2,22 +2,9 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { Plus, Trash2, Upload, ChevronDown, ChevronUp } from 'lucide-react'
+import { Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import { toast } from 'sonner'
-import type { Sprint } from '@/lib/sprint-types'
-
-interface SprintTask {
-  id: string
-  jira_key: string
-  title: string
-  label: string | null
-  status: string
-  priority: string | null
-  story_points: number
-  assignee: string | null
-  sprint_name: string
-  month_key: string
-}
+import type { Sprint, SprintTask } from '@/lib/sprint-types'
 
 const LABELS = [
   'INTERFAZ DE ADMIN',
@@ -311,4 +298,5 @@ export function TaskList({ sprint, tasks, onRefresh }: TaskListProps) {
     </div>
   )
 }
+
 

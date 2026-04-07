@@ -1,4 +1,4 @@
-export type TaskType = 'implementacion' | 'soporte' | 'deuda_tecnica' | 'mantenimiento'
+﻿export type TaskType = 'implementacion' | 'soporte' | 'deuda_tecnica' | 'mantenimiento'
 
 export interface SprintHour {
   id: string
@@ -26,6 +26,19 @@ export interface Sprint {
   inserted_at: string
 }
 
+export interface SprintTask {
+  id: string
+  jira_key: string
+  title: string
+  label: string | null
+  status: string
+  priority: string | null
+  story_points: number
+  assignee: string | null
+  sprint_name: string
+  month_key: string
+}
+
 export interface SprintStats {
   totalHours: number
   quotaHours: number
@@ -38,18 +51,16 @@ export interface SprintStats {
 }
 
 export const TASK_TYPE_OPTIONS = [
-  { value: 'implementacion', label: 'Implementación', color: '#D2262C' },
+  { value: 'implementacion', label: 'Implementacion', color: '#D2262C' },
   { value: 'soporte', label: 'Soporte', color: '#0EA5E9' },
-  { value: 'deuda_tecnica', label: 'Deuda Técnica', color: '#F59E0B' },
+  { value: 'deuda_tecnica', label: 'Deuda Tecnica', color: '#F59E0B' },
   { value: 'mantenimiento', label: 'Mantenimiento', color: '#8B5CF6' },
 ] as const
 
 export function normalizeTaskType(raw: string): TaskType {
   const map: Record<string, TaskType> = {
-    'implementación': 'implementacion',
     'implementacion': 'implementacion',
     'soporte': 'soporte',
-    'deuda técnica': 'deuda_tecnica',
     'deuda tecnica': 'deuda_tecnica',
     'mantenimiento': 'mantenimiento',
   }

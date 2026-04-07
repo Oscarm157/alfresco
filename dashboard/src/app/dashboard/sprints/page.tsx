@@ -6,14 +6,14 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, CartesianGrid,
 } from 'recharts'
-import { Clock, Target, AlertTriangle, Zap, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Clock, Target, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useSprintStats } from '@/hooks/use-sprint-stats'
 import { KPICard } from '@/components/dashboard/kpi-card'
 import { ChartCard } from '@/components/dashboard/chart-card'
 import { SprintForm } from '@/components/sprints/sprint-form'
 import { TaskList } from '@/components/sprints/task-list'
 import { TASK_TYPE_OPTIONS } from '@/lib/sprint-types'
-import type { SprintHour, Sprint } from '@/lib/sprint-types'
+import type { SprintHour, Sprint, SprintTask } from '@/lib/sprint-types'
 import { format, subMonths, addMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from 'sonner'
@@ -53,7 +53,7 @@ export default function SprintsPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [hours, setHours] = useState<SprintHour[]>([])
   const [sprints, setSprints] = useState<Sprint[]>([])
-  const [tasks, setTasks] = useState<Record<string, any[]>>({})
+  const [tasks, setTasks] = useState<Record<string, SprintTask[]>>({})
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -82,9 +82,9 @@ export default function SprintsPage() {
       setHours(Array.isArray(hoursData) ? hoursData : [])
       setSprints(Array.isArray(sprintsData) ? sprintsData : [])
 
-      const grouped: Record<string, any[]> = {}
+      const grouped: Record<string, SprintTask[]> = {}
       if (Array.isArray(tasksData)) {
-        tasksData.forEach((t: any) => {
+        tasksData.forEach((t: SprintTask) => {
           if (!grouped[t.sprint_name]) grouped[t.sprint_name] = []
           grouped[t.sprint_name].push(t)
         })
@@ -435,4 +435,5 @@ export default function SprintsPage() {
     </motion.div>
   )
 }
+
 

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Ticket, GitCompare, TrendingUp, Upload, Menu, X, Timer, UploadCloud } from 'lucide-react'
+import { LayoutDashboard, Ticket, GitCompare, TrendingUp, Upload, Menu, X, Timer } from 'lucide-react'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 
@@ -12,8 +12,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/sprints', label: 'Sprints', icon: Timer },
   { href: '/dashboard/compare', label: 'Comparar', icon: GitCompare },
   { href: '/dashboard/trends', label: 'Tendencias', icon: TrendingUp },
-  { href: '/dashboard/import', label: 'Importar Tickets', icon: Upload },
-  { href: '/dashboard/sprints/import', label: 'Importar Horas', icon: UploadCloud },
+  { href: '/dashboard/import', label: 'Importar', icon: Upload },
 ]
 
 export function Sidebar() {
@@ -119,5 +118,6 @@ export function Sidebar() {
     </>
   )
 }
+
 
 

@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useMemo } from 'react'
-import { format, startOfWeek, getWeek } from 'date-fns'
+import { format, startOfWeek } from 'date-fns'
 import { es } from 'date-fns/locale'
 import type { Ticket, TicketStats } from '@/lib/types'
 
@@ -150,4 +150,5 @@ export function useStats(tickets: Ticket[]): TicketStats {
     }
   }, [tickets])
 }
+
 

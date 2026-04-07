@@ -1,4 +1,4 @@
-import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths, format, parse } from 'date-fns'
+﻿import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths, format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 export function formatResolutionTime(minutes: number | null): string {
@@ -98,3 +98,4 @@ export function formatDate(dateStr: string, fmt: string = 'dd MMM yyyy'): string
     return dateStr
   }
 }
+

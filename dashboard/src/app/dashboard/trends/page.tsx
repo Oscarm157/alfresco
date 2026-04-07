@@ -1,6 +1,5 @@
 ﻿'use client'
 
-import { useState } from 'react'
 import { motion } from 'motion/react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Area, AreaChart } from 'recharts'
 import { useTickets } from '@/hooks/use-tickets'
@@ -46,7 +45,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 }
 
 export default function TrendsPage() {
-  const { tickets, loading, refreshing } = useTickets({})
+  const { tickets, loading } = useTickets({})
   const monthlyData = groupByMonth(tickets)
 
   if (loading) {
@@ -131,4 +130,5 @@ export default function TrendsPage() {
     </motion.div>
   )
 }
+
 
