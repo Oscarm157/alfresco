@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { motion } from 'motion/react'
-import { Plus, Search, Hourglass, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
+import { Plus, Search, Hourglass, CheckCircle2, XCircle, AlertTriangle, ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTickets } from '@/hooks/use-tickets'
-import { formatDate, formatResolutionTime, shortenName } from '@/lib/utils'
+import { formatDate, shortenName } from '@/lib/utils'
 import type { TicketFilters, TicketStatus } from '@/lib/types'
 
 const containerVariants = {
@@ -24,10 +24,87 @@ const STATUS_TABS: { value: TicketStatus; label: string; color: string; icon: Re
   { value: 'escalado', label: 'Escalados', color: '#8B5CF6', icon: <AlertTriangle size={14} /> },
 ]
 
+function formatDescription(text: string | null): React.ReactNode {
+  if (!text) return <span className="text-text-tertiary">Sin descripción</span>
+
+  // Split by common patterns that indicate structure
+  const lines = text
+    .replace(/- Regla:/g, '\n- Regla:')
+    .replace(/- Estado:/g, '\n  Estado:')
+    .replace(/Estado:/g, '\nEstado:')
+    .replace(/Motivo:/g, '\nMotivo:')
+    .replace(/Valor fuente:/g, '\nValor fuente:')
+    .replace(/Valor objetivo:/g, '\nValor objetivo:')
+    .replace(/Resumen de validaciones:/g, '\nResumen de validaciones:')
+    .replace(/Detalles de validaciones:/g, '\n\nDetalles de validaciones:')
+    .replace(/Métricas \(estructura completa\):/g, '\n\nMétricas:')
+    .replace(/• /g, '\n  • ')
+    .replace(/ - Total/g, '\n  - Total')
+    .replace(/ - Pasaron/g, '\n  - Pasaron')
+    .replace(/ - Fallaron/g, '\n  - Fallaron')
+    .replace(/ - Alertas/g, '\n  - Alertas')
+    .split('\n')
+    .filter(l => l.trim())
+
+  return (
+    <div className="space-y-1">
+      {lines.map((line, i) => {
+        const trimmed = line.trim()
+
+        // Section headers
+        if (trimmed.startsWith('Resumen de validaciones') || trimmed.startsWith('Detalles de validaciones') || trimmed.startsWith('Métricas')) {
+          return <div key={i} className="text-[11px] font-bold text-text-secondary uppercase tracking-wider mt-2 mb-1">{trimmed}</div>
+        }
+
+        // Rules
+        if (trimmed.startsWith('- Regla:')) {
+          return <div key={i} className="text-[12px] text-text-primary font-medium mt-2 pl-2 border-l-2 border-atisa/20">{trimmed.replace('- Regla: ', '')}</div>
+        }
+
+        // Key-value fields (Estado, Motivo, Valor)
+        const kvMatch = trimmed.match(/^(Estado|Motivo|Valor fuente|Valor objetivo):\s*(.*)/)
+        if (kvMatch) {
+          const [, key, val] = kvMatch
+          const isStatus = key === 'Estado'
+          const statusColor = val === 'passed' ? '#10B981' : val === 'missing_info' ? '#F59E0B' : '#999'
+          return (
+            <div key={i} className="flex gap-2 text-[12px] pl-4">
+              <span className="text-text-tertiary font-medium min-w-[90px]">{key}:</span>
+              {isStatus ? (
+                <span className="font-mono font-semibold" style={{ color: statusColor }}>{val}</span>
+              ) : (
+                <span className="text-text-secondary">{val}</span>
+              )}
+            </div>
+          )
+        }
+
+        // Bullets
+        if (trimmed.startsWith('•') || trimmed.startsWith('- ')) {
+          return <div key={i} className="text-[12px] text-text-secondary pl-4">{trimmed}</div>
+        }
+
+        // Default
+        return <div key={i} className="text-[12px] text-text-secondary leading-relaxed">{trimmed}</div>
+      })}
+    </div>
+  )
+}
+
+function getPriorityBadge(priority: string) {
+  const styles: Record<string, string> = {
+    urgente: 'bg-[#EF4444]/10 text-[#EF4444]',
+    alta: 'bg-[#F59E0B]/10 text-[#F59E0B]',
+    normal: 'bg-surface text-text-tertiary',
+  }
+  return styles[priority] || styles.normal
+}
+
 export default function TicketsPage() {
   const [filters] = useState<TicketFilters>({})
   const [activeTab, setActiveTab] = useState<TicketStatus>('pendiente')
   const [search, setSearch] = useState('')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const { tickets, loading, refreshing } = useTickets(filters)
 
   const filtered = useMemo(() => {
@@ -49,24 +126,15 @@ export default function TicketsPage() {
     return c
   }, [tickets])
 
-  const getPriorityBadge = (priority: string) => {
-    const styles: Record<string, string> = {
-      urgente: 'bg-[#EF4444]/10 text-[#EF4444]',
-      alta: 'bg-[#F59E0B]/10 text-[#F59E0B]',
-      normal: 'bg-surface text-text-tertiary',
-    }
-    return styles[priority] || styles.normal
-  }
+  const isLongDescription = (desc: string | null) => (desc?.length || 0) > 120
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className={`transition-opacity duration-300 ${refreshing ? 'opacity-60' : 'opacity-100'}`}>
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between mb-5">
-        <div>
-          <h1 className="font-heading text-[28px] font-bold tracking-tight text-text-primary">
-            Detalle de <span className="text-atisa">tickets</span>
-          </h1>
-        </div>
+        <h1 className="font-heading text-[28px] font-bold tracking-tight text-text-primary">
+          Detalle de <span className="text-atisa">tickets</span>
+        </h1>
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
@@ -78,7 +146,7 @@ export default function TicketsPage() {
         </motion.button>
       </motion.div>
 
-      {/* Tabs with icons */}
+      {/* Tabs */}
       <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-1 mb-4">
         {STATUS_TABS.map((tab) => {
           const isActive = activeTab === tab.value
@@ -86,7 +154,7 @@ export default function TicketsPage() {
           return (
             <button
               key={tab.value}
-              onClick={() => setActiveTab(tab.value)}
+              onClick={() => { setActiveTab(tab.value); setExpandedId(null) }}
               className={`
                 flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-medium transition-all
                 ${isActive
@@ -121,7 +189,7 @@ export default function TicketsPage() {
         />
       </motion.div>
 
-      {/* Table */}
+      {/* Ticket List */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-3 border-atisa border-t-transparent rounded-full animate-spin" />
@@ -133,58 +201,92 @@ export default function TicketsPage() {
           <p className="text-[13px] text-text-tertiary">Ajusta los filtros o busca otro término</p>
         </div>
       ) : (
-        <motion.div variants={itemVariants} className="bg-white rounded-xl overflow-hidden" style={{ boxShadow: 'var(--shadow-sm)' }}>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-[11px] uppercase tracking-wider text-text-tertiary border-b border-gray-100">
-                  <th className="py-3 px-4 font-semibold">Orden</th>
-                  <th className="py-3 px-4 font-semibold">Fecha</th>
-                  <th className="py-3 px-4 font-semibold">Prioridad</th>
-                  <th className="py-3 px-4 font-semibold">Solicitó</th>
-                  <th className="py-3 px-4 font-semibold">Descripción</th>
-                  {activeTab === 'resuelto' && <th className="py-3 px-4 font-semibold">Tiempo</th>}
-                  {activeTab === 'resuelto' && <th className="py-3 px-4 font-semibold">Resuelto por</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((ticket) => (
-                  <tr
-                    key={ticket.id}
-                    className="border-b border-gray-50 hover:bg-surface/40 transition-colors"
-                  >
-                    <td className="py-4 px-4 font-mono font-semibold text-atisa text-[13px]">
-                      #{ticket.order_number}
-                    </td>
-                    <td className="py-4 px-4 font-mono text-[13px] text-text-secondary">
-                      {formatDate(ticket.created_at, 'dd MMM')}
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className={`inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase ${getPriorityBadge(ticket.priority)}`}>
-                        {ticket.priority}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4 text-[13px] font-medium text-text-primary whitespace-nowrap">
-                      {shortenName(ticket.requester)}
-                    </td>
-                    <td className="py-4 px-4 text-[13px] text-text-secondary leading-relaxed max-w-[500px]">
-                      {ticket.description}
-                    </td>
-                    {activeTab === 'resuelto' && (
-                      <td className="py-4 px-4 font-mono text-[13px] font-semibold text-escalated whitespace-nowrap">
-                        {ticket.resolution_time_display || '-'}
-                      </td>
-                    )}
-                    {activeTab === 'resuelto' && (
-                      <td className="py-4 px-4 text-[13px] text-text-secondary">
-                        {ticket.resolved_by || '-'}
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <motion.div variants={itemVariants} className="space-y-2">
+          {filtered.map((ticket) => {
+            const isExpanded = expandedId === ticket.id
+            const isLong = isLongDescription(ticket.description)
+
+            return (
+              <div
+                key={ticket.id}
+                className="bg-white rounded-xl overflow-hidden transition-shadow"
+                style={{ boxShadow: 'var(--shadow-sm)' }}
+              >
+                {/* Row header — always visible */}
+                <div
+                  className={`flex items-start gap-4 px-4 py-3.5 ${isLong ? 'cursor-pointer hover:bg-surface/30' : ''}`}
+                  onClick={() => isLong && setExpandedId(isExpanded ? null : ticket.id)}
+                >
+                  {/* Order */}
+                  <span className="font-mono font-semibold text-atisa text-[13px] min-w-[70px] pt-0.5">
+                    #{ticket.order_number}
+                  </span>
+
+                  {/* Date */}
+                  <span className="font-mono text-[12px] text-text-tertiary min-w-[50px] pt-0.5">
+                    {formatDate(ticket.created_at, 'dd MMM')}
+                  </span>
+
+                  {/* Priority */}
+                  <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${getPriorityBadge(ticket.priority)}`}>
+                    {ticket.priority}
+                  </span>
+
+                  {/* Requester */}
+                  <span className="text-[13px] font-medium text-text-primary min-w-[90px] whitespace-nowrap pt-0.5">
+                    {shortenName(ticket.requester)}
+                  </span>
+
+                  {/* Description preview */}
+                  <span className="text-[13px] text-text-secondary flex-1 leading-relaxed pt-0.5">
+                    {isLong && !isExpanded
+                      ? `${ticket.description?.slice(0, 120)}...`
+                      : !isLong
+                        ? ticket.description || 'Sin descripción'
+                        : null
+                    }
+                  </span>
+
+                  {/* Resolution info (only for resueltos) */}
+                  {activeTab === 'resuelto' && ticket.resolution_time_display && (
+                    <span className="font-mono text-[12px] font-semibold text-escalated whitespace-nowrap pt-0.5">
+                      {ticket.resolution_time_display}
+                    </span>
+                  )}
+                  {activeTab === 'resuelto' && ticket.resolved_by && (
+                    <span className="text-[12px] text-text-tertiary whitespace-nowrap pt-0.5">
+                      {ticket.resolved_by}
+                    </span>
+                  )}
+
+                  {/* Expand indicator */}
+                  {isLong && (
+                    <ChevronDown
+                      size={14}
+                      className={`text-text-tertiary flex-shrink-0 mt-1 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                    />
+                  )}
+                </div>
+
+                {/* Expanded description */}
+                <AnimatePresence>
+                  {isExpanded && isLong && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-4 pb-4 pt-1 ml-[120px] border-t border-gray-50">
+                        {formatDescription(ticket.description)}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )
+          })}
         </motion.div>
       )}
     </motion.div>
