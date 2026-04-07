@@ -81,12 +81,72 @@ export function useStats(tickets: Ticket[]): TicketStats {
       .map(([date, count]) => ({ date, count }))
       .sort((a, b) => parseInt(a.date) - parseInt(b.date))
 
+    // Sparklines: last 7 days of data per metric
+    const now = new Date()
+    const last7 = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(now)
+      d.setDate(d.getDate() - (6 - i))
+      return format(d, 'yyyy-MM-dd')
+    })
+    const sparkTotal: number[] = []
+    const sparkResueltos: number[] = []
+    const sparkPendientes: number[] = []
+    const sparkCancelados: number[] = []
+    const sparkAvgTime: number[] = []
+    for (const day of last7) {
+      const dayTickets = tickets.filter(t => t.created_at.startsWith(day))
+      sparkTotal.push(dayTickets.length)
+      sparkResueltos.push(dayTickets.filter(t => t.status === 'resuelto').length)
+      sparkPendientes.push(dayTickets.filter(t => t.status === 'pendiente').length)
+      sparkCancelados.push(dayTickets.filter(t => t.status === 'cancelado').length)
+      const dayTimes = dayTickets
+        .filter(t => t.resolution_time_minutes && t.resolution_time_minutes > 0)
+        .map(t => t.resolution_time_minutes!)
+      sparkAvgTime.push(dayTimes.length > 0 ? Math.round(dayTimes.reduce((a, b) => a + b, 0) / dayTimes.length) : 0)
+    }
+
+    // Deltas: compare first half vs second half of current tickets for period-over-period
+    const sorted = [...tickets].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+    const mid = Math.floor(sorted.length / 2)
+    const firstHalf = sorted.slice(0, mid)
+    const secondHalf = sorted.slice(mid)
+    const calcDelta = (current: number, previous: number): number | null => {
+      if (previous === 0) return current > 0 ? 100 : null
+      return Math.round(((current - previous) / previous) * 100)
+    }
+    const fhResueltos = firstHalf.filter(t => t.status === 'resuelto').length
+    const shResueltos = secondHalf.filter(t => t.status === 'resuelto').length
+    const fhPendientes = firstHalf.filter(t => t.status === 'pendiente').length
+    const shPendientes = secondHalf.filter(t => t.status === 'pendiente').length
+    const fhCancelados = firstHalf.filter(t => t.status === 'cancelado').length
+    const shCancelados = secondHalf.filter(t => t.status === 'cancelado').length
+    const fhTimes = firstHalf.filter(t => t.resolution_time_minutes && t.resolution_time_minutes > 0).map(t => t.resolution_time_minutes!)
+    const shTimes = secondHalf.filter(t => t.resolution_time_minutes && t.resolution_time_minutes > 0).map(t => t.resolution_time_minutes!)
+    const fhAvg = fhTimes.length > 0 ? fhTimes.reduce((a, b) => a + b, 0) / fhTimes.length : 0
+    const shAvg = shTimes.length > 0 ? shTimes.reduce((a, b) => a + b, 0) / shTimes.length : 0
+
+    const sparklines = {
+      total: sparkTotal,
+      resueltos: sparkResueltos,
+      pendientes: sparkPendientes,
+      cancelados: sparkCancelados,
+      avgTime: sparkAvgTime,
+    }
+    const deltas = {
+      total: calcDelta(secondHalf.length, firstHalf.length),
+      resueltos: calcDelta(shResueltos, fhResueltos),
+      pendientes: calcDelta(shPendientes, fhPendientes),
+      cancelados: calcDelta(shCancelados, fhCancelados),
+      avgTime: calcDelta(Math.round(shAvg), Math.round(fhAvg)),
+    }
+
     return {
       total, resueltos, pendientes, cancelados, escalados,
       resolutionRate, avgResolutionMinutes, medianResolutionMinutes,
       minResolutionMinutes, maxResolutionMinutes,
       byRequester, byPriority, byCategory, byResolvedBy,
       byWeek, byDay,
+      sparklines, deltas,
     }
   }, [tickets])
 }

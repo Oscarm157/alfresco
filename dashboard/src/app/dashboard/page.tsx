@@ -76,13 +76,22 @@ export default function DashboardPage() {
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className={`transition-opacity duration-300 ${refreshing ? 'opacity-60' : 'opacity-100'}`}>
       {/* Header */}
-      <motion.div variants={itemVariants} className="mb-6">
-        <h1 className="font-heading text-[28px] font-bold tracking-tight text-text-primary">
-          Tickets de Soporte <span className="text-atisa">Alfresco</span>
-        </h1>
-        <p className="text-sm text-text-tertiary mt-1">
-          Panel de control · Grupo ATISA
-        </p>
+      <motion.div variants={itemVariants} className="mb-8 flex items-end justify-between">
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-1 h-8 rounded-full bg-atisa" />
+            <h1 className="font-heading text-[34px] font-bold tracking-tight text-text-primary leading-none">
+              Tickets de Soporte <span className="text-atisa">Alfresco</span>
+            </h1>
+          </div>
+          <p className="text-sm text-text-secondary ml-4 font-medium">
+            Panel de control · Grupo ATISA
+          </p>
+        </div>
+        <div className="hidden md:flex items-center gap-2 text-xs text-text-tertiary font-mono">
+          <div className="w-2 h-2 rounded-full bg-resolved animate-pulse" />
+          {stats.total} tickets
+        </div>
       </motion.div>
 
       {/* Filters */}
@@ -91,12 +100,14 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* KPI Row */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 overflow-hidden">
+      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8 overflow-hidden">
         <KPICard
           value={stats.total}
           label="Tickets totales"
           accentColor="#0EA5E9"
           icon={<ClipboardList size={18} />}
+          sparkline={stats.sparklines.total}
+          delta={stats.deltas.total}
         />
         <KPICard
           value={stats.resueltos}
@@ -104,6 +115,8 @@ export default function DashboardPage() {
           subtitle={`${stats.resolutionRate.toFixed(1)}%`}
           accentColor="#10B981"
           icon={<CheckCircle2 size={18} />}
+          sparkline={stats.sparklines.resueltos}
+          delta={stats.deltas.resueltos}
         />
         <KPICard
           value={stats.pendientes}
@@ -111,6 +124,9 @@ export default function DashboardPage() {
           subtitle={stats.total > 0 ? `${((stats.pendientes / stats.total) * 100).toFixed(1)}%` : '0%'}
           accentColor="#F59E0B"
           icon={<Clock size={18} />}
+          sparkline={stats.sparklines.pendientes}
+          delta={stats.deltas.pendientes}
+          invertDelta
         />
         <KPICard
           value={stats.cancelados}
@@ -118,6 +134,9 @@ export default function DashboardPage() {
           subtitle={stats.total > 0 ? `${((stats.cancelados / stats.total) * 100).toFixed(1)}%` : '0%'}
           accentColor="#EF4444"
           icon={<XCircle size={18} />}
+          sparkline={stats.sparklines.cancelados}
+          delta={stats.deltas.cancelados}
+          invertDelta
         />
         <KPICard
           value={formatResolutionTime(stats.avgResolutionMinutes)}
@@ -125,6 +144,9 @@ export default function DashboardPage() {
           subtitle={`mediana ${formatResolutionTime(stats.medianResolutionMinutes)}`}
           accentColor="#8B5CF6"
           icon={<Timer size={18} />}
+          sparkline={stats.sparklines.avgTime}
+          delta={stats.deltas.avgTime}
+          invertDelta
         />
       </motion.div>
 

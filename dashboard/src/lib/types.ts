@@ -48,6 +48,20 @@ export interface TicketStats {
   byResolvedBy: Record<string, number>
   byWeek: { week: string; total: number; resueltos: number; pendientes: number; cancelados: number }[]
   byDay: { date: string; count: number }[]
+  sparklines: {
+    total: number[]
+    resueltos: number[]
+    pendientes: number[]
+    cancelados: number[]
+    avgTime: number[]
+  }
+  deltas: {
+    total: number | null
+    resueltos: number | null
+    pendientes: number | null
+    cancelados: number | null
+    avgTime: number | null
+  }
 }
 
 export interface ImportRow {

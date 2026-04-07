@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, Filter, X, Download, FileSpreadsheet } from 'lucide-react'
-import { motion } from 'motion/react'
+import { Calendar, SlidersHorizontal, X, Download, FileSpreadsheet, ChevronDown } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
 import type { TicketFilters } from '@/lib/types'
 import { DATE_PRESETS, STATUS_OPTIONS, PRIORITY_OPTIONS, RESOLVED_BY_OPTIONS } from '@/lib/constants'
 import { getDateRange } from '@/lib/utils'
@@ -13,6 +13,27 @@ interface FilterBarProps {
   onFiltersChange: (filters: TicketFilters) => void
   onExportPDF?: () => void
   onExportExcel?: () => void
+}
+
+function FilterSelect({ value, onChange, placeholder, children }: {
+  value: string
+  onChange: (v: string) => void
+  placeholder: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-11 pl-4 pr-9 rounded-xl bg-white/80 text-sm text-text-primary font-medium appearance-none cursor-pointer min-w-[130px] focus:outline-none focus:ring-2 focus:ring-atisa/15 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-shadow"
+      >
+        <option value="">{placeholder}</option>
+        {children}
+      </select>
+      <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
+    </div>
+  )
 }
 
 export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel }: FilterBarProps) {
@@ -50,106 +71,115 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
   const hasFilters = filters.status || filters.priority || filters.requester || filters.resolvedBy || filters.dateFrom
 
   return (
-    <div className="bg-surface-alt rounded-2xl px-5 py-4 mb-6">
+    <div className="rounded-2xl px-5 py-4 mb-6 bg-gradient-to-b from-surface-alt/80 to-surface-alt/40">
       {/* Date presets */}
-      <div className="flex flex-wrap items-center gap-2 mb-3">
-        <Calendar size={16} className="text-text-tertiary" />
+      <div className="flex flex-wrap items-center gap-2 mb-3.5">
+        <div className="w-8 h-8 rounded-lg bg-white/60 flex items-center justify-center mr-0.5">
+          <Calendar size={15} className="text-text-tertiary" />
+        </div>
         {DATE_PRESETS.map((preset) => (
-          <button
+          <motion.button
             key={preset.value}
             onClick={() => handlePreset(preset.value)}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
             className={`
-              px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200
+              px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200
               ${activePreset === preset.value
-                ? 'bg-atisa text-white shadow-[0_2px_8px_rgba(210,38,44,0.25)]'
-                : 'bg-white text-text-secondary hover:text-text-primary hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
+                ? 'bg-atisa text-white shadow-[0_2px_12px_rgba(210,38,44,0.3)]'
+                : 'bg-white/70 text-text-secondary hover:text-text-primary hover:bg-white shadow-[0_1px_3px_rgba(0,0,0,0.03)]'
               }
             `}
           >
             {preset.label}
-          </button>
+          </motion.button>
         ))}
       </div>
 
       {/* Filter dropdowns */}
       <div className="flex flex-wrap items-center gap-3">
-        <Filter size={16} className="text-text-tertiary" />
+        <div className="w-8 h-8 rounded-lg bg-white/60 flex items-center justify-center mr-0.5">
+          <SlidersHorizontal size={15} className="text-text-tertiary" />
+        </div>
 
-        <select
+        <FilterSelect
           value={filters.status || ''}
-          onChange={(e) => onFiltersChange({ ...filters, status: e.target.value as TicketFilters['status'] || undefined })}
-          className="h-12 px-4 rounded-xl bg-white text-sm text-text-primary font-medium appearance-none cursor-pointer min-w-[130px] focus:outline-none focus:ring-2 focus:ring-atisa/20"
+          onChange={(v) => onFiltersChange({ ...filters, status: v as TicketFilters['status'] || undefined })}
+          placeholder="Estado"
         >
-          <option value="">Estado</option>
           {STATUS_OPTIONS.map(o => (
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
-        </select>
+        </FilterSelect>
 
-        <select
+        <FilterSelect
           value={filters.priority || ''}
-          onChange={(e) => onFiltersChange({ ...filters, priority: e.target.value as TicketFilters['priority'] || undefined })}
-          className="h-12 px-4 rounded-xl bg-white text-sm text-text-primary font-medium appearance-none cursor-pointer min-w-[130px] focus:outline-none focus:ring-2 focus:ring-atisa/20"
+          onChange={(v) => onFiltersChange({ ...filters, priority: v as TicketFilters['priority'] || undefined })}
+          placeholder="Prioridad"
         >
-          <option value="">Prioridad</option>
           {PRIORITY_OPTIONS.map(o => (
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
-        </select>
+        </FilterSelect>
 
-        <select
+        <FilterSelect
           value={filters.requester || ''}
-          onChange={(e) => onFiltersChange({ ...filters, requester: e.target.value || undefined })}
-          className="h-12 px-4 rounded-xl bg-white text-sm text-text-primary font-medium appearance-none cursor-pointer min-w-[150px] focus:outline-none focus:ring-2 focus:ring-atisa/20"
+          onChange={(v) => onFiltersChange({ ...filters, requester: v || undefined })}
+          placeholder="Solicitante"
         >
-          <option value="">Solicitante</option>
           {requesters.map(r => (
             <option key={r} value={r}>{r}</option>
           ))}
-        </select>
+        </FilterSelect>
 
-        <select
+        <FilterSelect
           value={filters.resolvedBy || ''}
-          onChange={(e) => onFiltersChange({ ...filters, resolvedBy: e.target.value as TicketFilters['resolvedBy'] || undefined })}
-          className="h-12 px-4 rounded-xl bg-white text-sm text-text-primary font-medium appearance-none cursor-pointer min-w-[140px] focus:outline-none focus:ring-2 focus:ring-atisa/20"
+          onChange={(v) => onFiltersChange({ ...filters, resolvedBy: v as TicketFilters['resolvedBy'] || undefined })}
+          placeholder="Resuelto por"
         >
-          <option value="">Resuelto por</option>
           {RESOLVED_BY_OPTIONS.map(o => (
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
-        </select>
+        </FilterSelect>
 
-        {hasFilters && (
-          <motion.button
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            onClick={clearFilters}
-            className="flex items-center gap-1.5 px-3 h-12 rounded-xl text-sm text-text-tertiary hover:text-atisa hover:bg-white transition-all"
-          >
-            <X size={14} />
-            Limpiar
-          </motion.button>
-        )}
+        <AnimatePresence>
+          {hasFilters && (
+            <motion.button
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={clearFilters}
+              className="flex items-center gap-1.5 px-3.5 h-11 rounded-xl text-sm text-text-tertiary hover:text-atisa hover:bg-white/80 transition-all"
+            >
+              <X size={14} />
+              Limpiar
+            </motion.button>
+          )}
+        </AnimatePresence>
 
         <div className="hidden lg:flex flex-1" />
 
         {onExportPDF && (
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
             onClick={onExportPDF}
-            className="flex items-center gap-2 px-4 h-12 rounded-xl bg-white text-sm font-medium text-text-secondary hover:text-atisa hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all"
+            className="flex items-center gap-2 px-4 h-11 rounded-xl bg-white/70 text-sm font-medium text-text-secondary hover:text-atisa shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all"
           >
             <Download size={15} />
             PDF
-          </button>
+          </motion.button>
         )}
         {onExportExcel && (
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
             onClick={onExportExcel}
-            className="flex items-center gap-2 px-4 h-12 rounded-xl bg-white text-sm font-medium text-text-secondary hover:text-atisa hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all"
+            className="flex items-center gap-2 px-4 h-11 rounded-xl bg-white/70 text-sm font-medium text-text-secondary hover:text-atisa shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all"
           >
             <FileSpreadsheet size={15} />
             Excel
-          </button>
+          </motion.button>
         )}
       </div>
     </div>
