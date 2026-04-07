@@ -178,7 +178,7 @@ export default function SprintsPage() {
       </motion.div>
 
       {/* KPI Row */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 overflow-hidden">
         <KPICard
           value={`${stats.totalHours}h`}
           label="Horas totales"

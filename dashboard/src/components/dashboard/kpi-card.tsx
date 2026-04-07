@@ -14,7 +14,7 @@ export function KPICard({ value, label, subtitle, accentColor, icon }: KPICardPr
   return (
     <motion.div
       whileHover={{ y: -3, transition: { type: 'spring', stiffness: 400, damping: 17 } }}
-      className="relative bg-white rounded-2xl p-5 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-shadow overflow-hidden"
+      className="relative bg-white rounded-2xl p-4 sm:p-5 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-shadow overflow-hidden min-w-0"
     >
       {/* Left accent bar */}
       <div

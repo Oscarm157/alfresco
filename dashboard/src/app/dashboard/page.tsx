@@ -91,7 +91,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* KPI Row */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 overflow-hidden">
         <KPICard
           value={stats.total}
           label="Tickets totales"
