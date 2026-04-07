@@ -46,7 +46,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 }
 
 export default function TrendsPage() {
-  const { tickets, loading } = useTickets({})
+  const { tickets, loading, refreshing } = useTickets({})
   const monthlyData = groupByMonth(tickets)
 
   if (loading) {

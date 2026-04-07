@@ -44,7 +44,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 
 export default function DashboardPage() {
   const [filters, setFilters] = useState<TicketFilters>({})
-  const { tickets, loading } = useTickets(filters)
+  const { tickets, loading, refreshing } = useTickets(filters)
   const stats = useStats(tickets)
 
   const donutData = [
@@ -74,7 +74,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible">
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className={`transition-opacity duration-300 ${refreshing ? 'opacity-60' : 'opacity-100'}`}>
       {/* Header */}
       <motion.div variants={itemVariants} className="mb-6">
         <h1 className="font-heading text-[28px] font-bold tracking-tight text-text-primary">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Ticket, TicketFilters } from '@/lib/types'
 
 function buildQueryString(filters: TicketFilters): string {
@@ -17,13 +17,17 @@ function buildQueryString(filters: TicketFilters): string {
 
 export function useTickets(filters: TicketFilters) {
   const [tickets, setTickets] = useState<Ticket[]>([])
-  const [loading, setLoading] = useState(true)
+  const [initialLoading, setInitialLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const hasFetched = useRef(false)
 
   const filtersKey = JSON.stringify(filters)
 
   const fetchTickets = useCallback(async () => {
-    setLoading(true)
+    if (hasFetched.current) {
+      setRefreshing(true)
+    }
     setError(null)
     try {
       const qs = buildQueryString(filters)
@@ -34,7 +38,9 @@ export function useTickets(filters: TicketFilters) {
     } catch (err) {
       setError(String(err))
     } finally {
-      setLoading(false)
+      setInitialLoading(false)
+      setRefreshing(false)
+      hasFetched.current = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersKey])
@@ -43,5 +49,5 @@ export function useTickets(filters: TicketFilters) {
     fetchTickets()
   }, [fetchTickets])
 
-  return { tickets, loading, error, refetch: fetchTickets }
+  return { tickets, loading: initialLoading, refreshing, error, refetch: fetchTickets }
 }

@@ -31,7 +31,7 @@ export default function TicketsPage() {
   const [filters, setFilters] = useState<TicketFilters>({})
   const [activeTab, setActiveTab] = useState<TicketStatus | 'all'>('all')
   const [search, setSearch] = useState('')
-  const { tickets, loading } = useTickets(filters)
+  const { tickets, loading, refreshing } = useTickets(filters)
 
   const filtered = useMemo(() => {
     let result = tickets
@@ -63,7 +63,7 @@ export default function TicketsPage() {
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible">
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className={`transition-opacity duration-300 ${refreshing ? 'opacity-60' : 'opacity-100'}`}>
       <motion.div variants={itemVariants} className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-heading text-[28px] font-bold tracking-tight text-text-primary">

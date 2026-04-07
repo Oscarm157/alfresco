@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion } from 'motion/react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -54,12 +54,16 @@ export default function SprintsPage() {
   const [sprints, setSprints] = useState<Sprint[]>([])
   const [tasks, setTasks] = useState<Record<string, any[]>>({})
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const hasFetched = useRef(false)
 
   const monthKey = format(currentMonth, 'yyyy-MM')
   const monthLabel = format(currentMonth, 'MMMM yyyy', { locale: es })
 
   const fetchData = useCallback(async () => {
-    setLoading(true)
+    if (hasFetched.current) {
+      setRefreshing(true)
+    }
     const [hoursRes, sprintsRes, tasksRes] = await Promise.all([
       fetch(`/api/sprints/hours?month=${monthKey}`),
       fetch(`/api/sprints?month=${monthKey}`),
@@ -79,6 +83,8 @@ export default function SprintsPage() {
     }
     setTasks(grouped)
     setLoading(false)
+    setRefreshing(false)
+    hasFetched.current = true
   }, [monthKey])
 
   useEffect(() => { fetchData() }, [fetchData])
@@ -113,7 +119,7 @@ export default function SprintsPage() {
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible">
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className={`transition-opacity duration-300 ${refreshing ? 'opacity-60' : 'opacity-100'}`}>
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between mb-6">
         <div>
