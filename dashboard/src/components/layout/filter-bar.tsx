@@ -22,16 +22,16 @@ function FilterSelect({ value, onChange, placeholder, children }: {
   children: React.ReactNode
 }) {
   return (
-    <div className="relative">
+    <div className="relative group">
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-11 pl-4 pr-9 rounded-xl bg-white/80 text-sm text-text-primary font-medium appearance-none cursor-pointer min-w-[130px] focus:outline-none focus:ring-2 focus:ring-atisa/15 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-shadow"
+        className="h-[42px] pl-4 pr-10 rounded-xl bg-white text-[13px] text-text-primary font-medium appearance-none cursor-pointer min-w-[140px] focus:outline-none focus:ring-2 focus:ring-atisa/20 shadow-[0_1px_3px_rgba(0,0,0,0.06)] group-hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-200"
       >
         <option value="">{placeholder}</option>
         {children}
       </select>
-      <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
+      <ChevronDown size={13} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
     </div>
   )
 }
@@ -71,23 +71,23 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
   const hasFilters = filters.status || filters.priority || filters.requester || filters.resolvedBy || filters.dateFrom
 
   return (
-    <div className="rounded-2xl px-5 py-4 mb-6 bg-gradient-to-b from-surface-alt/80 to-surface-alt/40">
+    <div className="rounded-2xl p-5 mb-8 bg-[#F8F8F9] space-y-4">
       {/* Date presets */}
-      <div className="flex flex-wrap items-center gap-2 mb-3.5">
-        <div className="w-8 h-8 rounded-lg bg-white/60 flex items-center justify-center mr-0.5">
-          <Calendar size={15} className="text-text-tertiary" />
+      <div className="flex flex-wrap items-center gap-2.5">
+        <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.05)] mr-1">
+          <Calendar size={16} className="text-text-secondary" />
         </div>
         {DATE_PRESETS.map((preset) => (
           <motion.button
             key={preset.value}
             onClick={() => handlePreset(preset.value)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.96 }}
             className={`
-              px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200
+              px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-200
               ${activePreset === preset.value
-                ? 'bg-atisa text-white shadow-[0_2px_12px_rgba(210,38,44,0.3)]'
-                : 'bg-white/70 text-text-secondary hover:text-text-primary hover:bg-white shadow-[0_1px_3px_rgba(0,0,0,0.03)]'
+                ? 'bg-atisa text-white shadow-[0_4px_16px_rgba(210,38,44,0.35)]'
+                : 'bg-white text-text-secondary hover:text-text-primary shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)]'
               }
             `}
           >
@@ -96,10 +96,13 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
         ))}
       </div>
 
+      {/* Divider */}
+      <div className="h-px bg-black/[0.04]" />
+
       {/* Filter dropdowns */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-white/60 flex items-center justify-center mr-0.5">
-          <SlidersHorizontal size={15} className="text-text-tertiary" />
+        <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.05)] mr-1">
+          <SlidersHorizontal size={16} className="text-text-secondary" />
         </div>
 
         <FilterSelect
@@ -149,7 +152,7 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               onClick={clearFilters}
-              className="flex items-center gap-1.5 px-3.5 h-11 rounded-xl text-sm text-text-tertiary hover:text-atisa hover:bg-white/80 transition-all"
+              className="flex items-center gap-1.5 px-4 h-[42px] rounded-xl text-[13px] font-semibold text-atisa bg-white shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_12px_rgba(210,38,44,0.12)] transition-all"
             >
               <X size={14} />
               Limpiar
@@ -161,23 +164,23 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
 
         {onExportPDF && (
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.96 }}
             onClick={onExportPDF}
-            className="flex items-center gap-2 px-4 h-11 rounded-xl bg-white/70 text-sm font-medium text-text-secondary hover:text-atisa shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all"
+            className="flex items-center gap-2 px-4 h-[42px] rounded-xl bg-white text-[13px] font-semibold text-text-secondary hover:text-atisa shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all"
           >
-            <Download size={15} />
+            <Download size={14} />
             PDF
           </motion.button>
         )}
         {onExportExcel && (
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.96 }}
             onClick={onExportExcel}
-            className="flex items-center gap-2 px-4 h-11 rounded-xl bg-white/70 text-sm font-medium text-text-secondary hover:text-atisa shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all"
+            className="flex items-center gap-2 px-4 h-[42px] rounded-xl bg-white text-[13px] font-semibold text-text-secondary hover:text-atisa shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all"
           >
-            <FileSpreadsheet size={15} />
+            <FileSpreadsheet size={14} />
             Excel
           </motion.button>
         )}

@@ -76,22 +76,30 @@ export default function DashboardPage() {
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className={`transition-opacity duration-300 ${refreshing ? 'opacity-60' : 'opacity-100'}`}>
       {/* Header */}
-      <motion.div variants={itemVariants} className="mb-8 flex items-end justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-1 h-8 rounded-full bg-atisa" />
-            <h1 className="font-heading text-[34px] font-bold tracking-tight text-text-primary leading-none">
-              Tickets de Soporte <span className="text-atisa">Alfresco</span>
+      <motion.div variants={itemVariants} className="mb-10 relative">
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="text-[11px] font-bold text-text-tertiary uppercase tracking-[0.2em] mb-2">
+              Panel de control
+            </p>
+            <h1 className="font-heading text-[42px] font-bold tracking-tight text-text-primary leading-[1]">
+              Tickets de Soporte
+            </h1>
+            <h1 className="font-heading text-[42px] font-bold tracking-tight text-atisa leading-[1] mt-0.5">
+              Alfresco
             </h1>
           </div>
-          <p className="text-sm text-text-secondary ml-4 font-medium">
-            Panel de control · Grupo ATISA
-          </p>
+          <div className="hidden md:flex flex-col items-end gap-2">
+            <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-[#F8F8F9]">
+              <div className="w-2 h-2 rounded-full bg-resolved animate-pulse" />
+              <span className="text-sm font-mono font-bold text-text-primary">{stats.total}</span>
+              <span className="text-xs text-text-tertiary font-medium">tickets</span>
+            </div>
+            <span className="text-[10px] text-text-tertiary font-medium">Grupo ATISA</span>
+          </div>
         </div>
-        <div className="hidden md:flex items-center gap-2 text-xs text-text-tertiary font-mono">
-          <div className="w-2 h-2 rounded-full bg-resolved animate-pulse" />
-          {stats.total} tickets
-        </div>
+        {/* Red accent line */}
+        <div className="absolute left-0 -bottom-4 w-16 h-1 rounded-full bg-atisa" />
       </motion.div>
 
       {/* Filters */}
@@ -100,7 +108,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* KPI Row */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8 overflow-hidden">
+      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mb-10 overflow-hidden">
         <KPICard
           value={stats.total}
           label="Tickets totales"
