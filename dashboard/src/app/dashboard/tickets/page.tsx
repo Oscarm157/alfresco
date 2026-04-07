@@ -6,7 +6,7 @@ import { Plus, Search, Hourglass, CheckCircle2, XCircle, AlertTriangle, ChevronD
 import { toast } from 'sonner'
 import { useTickets } from '@/hooks/use-tickets'
 import { formatDate, shortenName } from '@/lib/utils'
-import type { TicketFilters, TicketStatus } from '@/lib/types'
+import type { ResolvedBy, TicketFilters, TicketStatus } from '@/lib/types'
 
 const containerVariants = {
   hidden: {},
@@ -22,6 +22,11 @@ const STATUS_TABS: { value: TicketStatus; label: string; color: string; icon: Re
   { value: 'resuelto', label: 'Resueltos', color: '#10B981', icon: <CheckCircle2 size={14} /> },
   { value: 'cancelado', label: 'Cancelados', color: '#EF4444', icon: <XCircle size={14} /> },
   { value: 'escalado', label: 'Escalados', color: '#8B5CF6', icon: <AlertTriangle size={14} /> },
+]
+
+const RESOLVED_BY_FILTERS: { value: ResolvedBy; label: string; color: string }[] = [
+  { value: 'TI', label: 'TI', color: '#2563EB' },
+  { value: 'Appropia', label: 'Appropia', color: '#7C3AED' },
 ]
 
 function formatDescription(text: string | null): React.ReactNode {
@@ -122,11 +127,17 @@ export default function TicketsPage() {
   const [filters] = useState<TicketFilters>({})
   const [activeTab, setActiveTab] = useState<TicketStatus>('pendiente')
   const [search, setSearch] = useState('')
+  const [resolvedByFilter, setResolvedByFilter] = useState<ResolvedBy[]>([])
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const { tickets, loading, refreshing } = useTickets(filters)
 
   const filtered = useMemo(() => {
     let result = tickets.filter(t => t.status === activeTab)
+
+    if (resolvedByFilter.length > 0) {
+      result = result.filter((ticket) => ticket.resolved_by && resolvedByFilter.includes(ticket.resolved_by))
+    }
+
     if (search) {
       const q = search.toLowerCase()
       result = result.filter(t =>
@@ -136,13 +147,20 @@ export default function TicketsPage() {
       )
     }
     return result
-  }, [tickets, activeTab, search])
+  }, [tickets, activeTab, resolvedByFilter, search])
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {}
     tickets.forEach(t => { c[t.status] = (c[t.status] || 0) + 1 })
     return c
   }, [tickets])
+
+  const toggleResolvedByFilter = (value: ResolvedBy) => {
+    setExpandedId(null)
+    setResolvedByFilter((current) =>
+      current.includes(value) ? current.filter((item) => item !== value) : [...current, value]
+    )
+  }
 
   const isLongDescription = (desc: string | null) => (desc?.length || 0) > 120
 
@@ -205,6 +223,37 @@ export default function TicketsPage() {
           onChange={(e) => setSearch(e.target.value)}
           className="w-full h-10 pl-10 pr-4 rounded-lg bg-surface text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-atisa/15"
         />
+      </motion.div>
+
+      <motion.div variants={itemVariants} className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
+          Resuelto por
+        </span>
+        {RESOLVED_BY_FILTERS.map((option) => {
+          const isActive = resolvedByFilter.includes(option.value)
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => toggleResolvedByFilter(option.value)}
+              className={`rounded-lg px-3 py-2 text-[13px] font-medium transition-all ${
+                isActive ? 'text-white' : 'bg-white text-text-secondary hover:text-text-primary'
+              }`}
+              style={isActive ? { backgroundColor: option.color, boxShadow: 'var(--shadow-sm)' } : { boxShadow: 'var(--shadow-sm)' }}
+            >
+              {option.label}
+            </button>
+          )
+        })}
+        {resolvedByFilter.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setResolvedByFilter([])}
+            className="rounded-lg px-3 py-2 text-[13px] font-medium text-atisa transition-colors hover:bg-white"
+          >
+            Limpiar
+          </button>
+        )}
       </motion.div>
 
       {/* Ticket List */}
