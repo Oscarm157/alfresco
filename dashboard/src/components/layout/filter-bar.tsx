@@ -5,7 +5,7 @@ import { X, Download, FileSpreadsheet, ChevronDown } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import type { TicketFilters } from '@/lib/types'
 import { DATE_PRESETS, STATUS_OPTIONS, PRIORITY_OPTIONS, RESOLVED_BY_OPTIONS } from '@/lib/constants'
-import { getDateRange } from '@/lib/utils'
+import { getDateRange, getMonthRange } from '@/lib/utils'
 import { supabase } from '@/lib/supabase/client'
 
 interface FilterBarProps {
@@ -40,6 +40,7 @@ function FilterSelect({ value, onChange, placeholder, children }: {
 export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel }: FilterBarProps) {
   const [requesters, setRequesters] = useState<string[]>([])
   const [activePreset, setActivePreset] = useState<string>('all')
+  const [selectedMonth, setSelectedMonth] = useState<string>('')
 
   useEffect(() => {
     supabase
@@ -56,6 +57,7 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
 
   const handlePreset = (preset: string) => {
     setActivePreset(preset)
+    setSelectedMonth('')
     if (preset === 'all') {
       onFiltersChange({ ...filters, dateFrom: undefined, dateTo: undefined })
     } else {
@@ -64,8 +66,22 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
     }
   }
 
+  const handleMonthChange = (monthValue: string) => {
+    setSelectedMonth(monthValue)
+    if (!monthValue) {
+      setActivePreset('all')
+      onFiltersChange({ ...filters, dateFrom: undefined, dateTo: undefined })
+      return
+    }
+
+    const range = getMonthRange(monthValue)
+    setActivePreset('custom_month')
+    onFiltersChange({ ...filters, dateFrom: range.from, dateTo: range.to })
+  }
+
   const clearFilters = () => {
     setActivePreset('all')
+    setSelectedMonth('')
     onFiltersChange({})
   }
 
@@ -94,6 +110,17 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
       </div>
 
       <div className="flex flex-wrap items-center gap-2.5">
+        <div className="relative">
+          <input
+            type="month"
+            value={selectedMonth}
+            onChange={(e) => handleMonthChange(e.target.value)}
+            className="h-10 rounded-lg bg-white px-3.5 text-[13px] text-text-primary font-medium focus:outline-none focus:ring-2 focus:ring-atisa/15 transition-shadow"
+            style={{ boxShadow: 'var(--shadow-sm)' }}
+            aria-label="Elegir mes"
+          />
+        </div>
+
         <FilterSelect
           value={filters.status || ''}
           onChange={(v) => onFiltersChange({ ...filters, status: v as TicketFilters['status'] || undefined })}

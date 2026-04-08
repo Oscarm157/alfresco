@@ -84,6 +84,17 @@ export function getDateRange(preset: string): { from: string; to: string } {
   }
 }
 
+export function getMonthRange(monthValue: string): { from: string; to: string } {
+  const [year, month] = monthValue.split('-').map(Number)
+  if (!year || !month) return { from: '', to: '' }
+
+  const date = new Date(year, month - 1, 1)
+  return {
+    from: format(startOfMonth(date), 'yyyy-MM-dd'),
+    to: format(endOfMonth(date), 'yyyy-MM-dd'),
+  }
+}
+
 export function shortenName(name: string): string {
   if (!name) return ''
   const parts = name.trim().split(/\s+/)
