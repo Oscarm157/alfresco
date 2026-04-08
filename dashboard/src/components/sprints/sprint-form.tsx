@@ -8,13 +8,16 @@ import { toast } from 'sonner'
 interface SprintFormProps {
   monthKey: string
   onCreated: () => void
+  buttonLabel?: string
+  defaultName?: string
+  disabled?: boolean
 }
 
-export function SprintForm({ monthKey, onCreated }: SprintFormProps) {
+export function SprintForm({ monthKey, onCreated, buttonLabel = 'Nuevo Sprint', defaultName = '', disabled = false }: SprintFormProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
-    name: '',
+    name: defaultName,
     start_date: '',
     end_date: '',
     dev_sp_committed: 20,
@@ -39,7 +42,7 @@ export function SprintForm({ monthKey, onCreated }: SprintFormProps) {
       })
       if (!res.ok) throw new Error('Error al crear sprint')
       toast.success(`Sprint "${form.name}" creado`)
-      setForm({ name: '', start_date: '', end_date: '', dev_sp_committed: 20, maintenance_sp_committed: 4 })
+      setForm({ name: defaultName, start_date: '', end_date: '', dev_sp_committed: 20, maintenance_sp_committed: 4 })
       setOpen(false)
       onCreated()
     } catch (err) {
@@ -54,11 +57,12 @@ export function SprintForm({ monthKey, onCreated }: SprintFormProps) {
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.97 }}
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-5 h-12 rounded-xl bg-atisa text-white text-sm font-semibold shadow-[0_4px_14px_rgba(210,38,44,0.3)] hover:bg-atisa-hover transition-colors"
+        onClick={() => !disabled && setOpen(true)}
+        disabled={disabled}
+        className="flex items-center gap-2 px-5 h-12 rounded-xl bg-atisa text-white text-sm font-semibold shadow-[0_4px_14px_rgba(210,38,44,0.3)] hover:bg-atisa-hover transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Plus size={18} />
-        Nuevo Sprint
+        {buttonLabel}
       </motion.button>
     )
   }

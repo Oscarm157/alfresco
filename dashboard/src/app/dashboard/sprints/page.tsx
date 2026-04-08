@@ -51,6 +51,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 
 export default function SprintsPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [selectedSprint, setSelectedSprint] = useState<string>('all')
   const [hours, setHours] = useState<SprintHour[]>([])
   const [sprints, setSprints] = useState<Sprint[]>([])
   const [tasks, setTasks] = useState<Record<string, SprintTask[]>>({})
@@ -61,6 +62,28 @@ export default function SprintsPage() {
 
   const monthKey = format(currentMonth, 'yyyy-MM')
   const monthLabel = format(currentMonth, 'MMMM yyyy', { locale: es })
+  const orderedSprints = [...sprints].sort((a, b) => {
+    const left = a.start_date || a.name
+    const right = b.start_date || b.name
+    return left.localeCompare(right)
+  })
+  const sprintFilterOptions = [
+    { value: 'all', label: 'Todos' },
+    ...orderedSprints.map((sprint, index) => ({
+      value: sprint.name,
+      label: `Sprint ${index + 1}`,
+      subtitle: sprint.name,
+    })),
+  ]
+  const activeHours = selectedSprint === 'all'
+    ? hours
+    : hours.filter((hour) => hour.sprint === selectedSprint)
+  const activeSprints = selectedSprint === 'all'
+    ? orderedSprints
+    : orderedSprints.filter((sprint) => sprint.name === selectedSprint)
+  const visibleTasks = selectedSprint === 'all'
+    ? tasks
+    : Object.fromEntries(Object.entries(tasks).filter(([name]) => name === selectedSprint))
 
   const fetchData = useCallback(async () => {
     if (hasFetched.current) {
@@ -106,7 +129,13 @@ export default function SprintsPage() {
 
   useEffect(() => { fetchData() }, [fetchData])
 
-  const stats = useSprintStats(hours)
+  useEffect(() => {
+    if (selectedSprint !== 'all' && !orderedSprints.some((sprint) => sprint.name === selectedSprint)) {
+      setSelectedSprint('all')
+    }
+  }, [orderedSprints, selectedSprint])
+
+  const stats = useSprintStats(activeHours)
 
   const quotaPercent = stats.quotaHours > 0 ? Math.round((stats.hoursWithoutDebt / stats.quotaHours) * 100) : 0
 
@@ -122,10 +151,11 @@ export default function SprintsPage() {
     mantenimiento: data.byType['mantenimiento'] || 0,
   }))
 
-  const totalDevSP = sprints.reduce((a, s) => a + s.dev_sp_delivered, 0)
-  const totalDevSPCommitted = sprints.reduce((a, s) => a + s.dev_sp_committed, 0)
-  const totalMaintSP = sprints.reduce((a, s) => a + s.maintenance_sp_delivered, 0)
-  const totalMaintSPCommitted = sprints.reduce((a, s) => a + s.maintenance_sp_committed, 0)
+  const totalDevSP = activeSprints.reduce((a, s) => a + s.dev_sp_delivered, 0)
+  const totalDevSPCommitted = activeSprints.reduce((a, s) => a + s.dev_sp_committed, 0)
+  const totalMaintSP = activeSprints.reduce((a, s) => a + s.maintenance_sp_delivered, 0)
+  const totalMaintSPCommitted = activeSprints.reduce((a, s) => a + s.maintenance_sp_committed, 0)
+  const sprintSlots = [0, 1].map((index) => orderedSprints[index] || null)
 
   if (loading) {
     return (
@@ -173,6 +203,69 @@ export default function SprintsPage() {
           {error}
         </motion.div>
       )}
+
+      <motion.div variants={itemVariants} className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {sprintSlots.map((sprint, index) => (
+          <div key={index} className="rounded-2xl bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
+                  Slot {index + 1}
+                </div>
+                <div className="font-heading text-lg font-bold text-text-primary">
+                  {sprint?.name || `Sprint ${index + 1}`}
+                </div>
+              </div>
+              {!sprint && (
+                <SprintForm
+                  monthKey={monthKey}
+                  onCreated={fetchData}
+                  buttonLabel={`Crear Sprint ${index + 1}`}
+                  defaultName={`Sprint ${index + 1}`}
+                  disabled={orderedSprints.length >= 2}
+                />
+              )}
+            </div>
+            {sprint ? (
+              <div className="space-y-2 text-sm text-text-secondary">
+                <div>
+                  {sprint.start_date && sprint.end_date
+                    ? `${sprint.start_date} - ${sprint.end_date}`
+                    : 'Fechas por definir'}
+                </div>
+                <div className="font-mono text-xs text-text-tertiary">
+                  {sprint.dev_sp_committed} SP desarrollo · {sprint.maintenance_sp_committed} SP mantenimiento
+                </div>
+              </div>
+            ) : (
+              <div className="text-sm text-text-tertiary">
+                Slot disponible para capturar el sprint de esta quincena.
+              </div>
+            )}
+          </div>
+        ))}
+      </motion.div>
+
+      <motion.div variants={itemVariants} className="mb-6 flex flex-wrap items-center gap-2">
+        <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
+          Vista
+        </span>
+        {sprintFilterOptions.map((option) => {
+          const isActive = selectedSprint === option.value
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setSelectedSprint(option.value)}
+              className={`rounded-lg px-3 py-2 text-[13px] font-medium transition-all ${
+                isActive ? 'bg-atisa text-white shadow-[0_2px_8px_rgba(210,38,44,0.25)]' : 'bg-white text-text-secondary'
+              }`}
+            >
+              {option.label}
+            </button>
+          )
+        })}
+      </motion.div>
 
       {/* Quota Progress Bar */}
       <motion.div variants={itemVariants} className="bg-white rounded-2xl p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)] mb-6">
@@ -223,7 +316,7 @@ export default function SprintsPage() {
         <KPICard
           value={`${totalDevSP}/${totalDevSPCommitted}`}
           label="SP Desarrollo"
-          subtitle={sprints.length > 0 ? `${sprints.length} sprints` : 'Sin sprints'}
+          subtitle={activeSprints.length > 0 ? `${activeSprints.length} sprints` : 'Sin sprints'}
           accentColor="#D2262C"
         />
         <KPICard
@@ -234,7 +327,7 @@ export default function SprintsPage() {
       </motion.div>
 
       {/* Charts Row - only show when there's data */}
-      {hours.length > 0 && (
+      {activeHours.length > 0 && (
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         {/* Hours by day */}
         <ChartCard title="Horas por dia" tag="DETALLE">
@@ -287,7 +380,7 @@ export default function SprintsPage() {
       )}
 
       {/* Sprint breakdown - only show when there's data */}
-      {hours.length > 0 && (
+      {activeHours.length > 0 && (
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <ChartCard title="Horas por sprint" tag="SPRINT">
           <div className="w-full h-[240px]">
@@ -308,7 +401,7 @@ export default function SprintsPage() {
 
         {/* Sprint SP cards */}
         <ChartCard title="Story Points por sprint">
-          {sprints.length === 0 ? (
+          {activeSprints.length === 0 ? (
             <div className="text-center py-12">
               <Target size={36} className="mx-auto text-text-tertiary mb-3" />
               <p className="text-sm text-text-secondary mb-1">Sin sprints registrados</p>
@@ -316,7 +409,7 @@ export default function SprintsPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {sprints.map(s => (
+              {activeSprints.map(s => (
                 <div key={s.id} className="bg-surface rounded-xl p-4">
                   <div className="font-heading font-semibold text-sm text-text-primary mb-3">{s.name}</div>
                   <div className="grid grid-cols-2 gap-4">
@@ -357,8 +450,8 @@ export default function SprintsPage() {
 
       {/* Detailed hours table */}
       <motion.div variants={itemVariants}>
-        <ChartCard title="Detalle de horas" tag={`${hours.length} REGISTROS`}>
-          {hours.length === 0 ? (
+        <ChartCard title="Detalle de horas" tag={`${activeHours.length} REGISTROS`}>
+          {activeHours.length === 0 ? (
             <div className="text-center py-12">
               <Clock size={36} className="mx-auto text-text-tertiary mb-3" />
               <p className="text-sm text-text-secondary">Sin registros para este mes</p>
@@ -377,7 +470,7 @@ export default function SprintsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {hours.map((h) => {
+                  {activeHours.map((h) => {
                     const typeColor = TYPE_COLORS[h.task_type] || '#999'
                     return (
                       <tr key={h.id} className="hover:bg-surface/30 transition-colors">
@@ -410,10 +503,10 @@ export default function SprintsPage() {
           <h2 className="font-heading font-bold text-lg text-text-primary">
             Tablero de <span className="text-atisa">Sprints</span>
           </h2>
-          <SprintForm monthKey={monthKey} onCreated={fetchData} />
+          <SprintForm monthKey={monthKey} onCreated={fetchData} disabled={orderedSprints.length >= 2} />
         </div>
 
-        {sprints.length === 0 ? (
+        {activeSprints.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] text-center py-16">
             <Target size={40} className="mx-auto text-text-tertiary mb-3" />
             <p className="text-lg font-medium text-text-primary mb-1">Sin sprints para este mes</p>
@@ -421,11 +514,11 @@ export default function SprintsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {sprints.map(s => (
+            {activeSprints.map(s => (
               <TaskList
                 key={s.id}
                 sprint={s}
-                tasks={tasks[s.name] || []}
+                tasks={visibleTasks[s.name] || []}
                 onRefresh={fetchData}
               />
             ))}
