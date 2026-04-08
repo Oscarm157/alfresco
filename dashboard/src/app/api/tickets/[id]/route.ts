@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase/client'
+import { inferTicketCategory } from '@/lib/ticket-categorization'
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -10,16 +11,34 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 404 })
-  return NextResponse.json(data)
+  return NextResponse.json({
+    ...data,
+    category: inferTicketCategory({
+      category: data.category,
+      description: data.description,
+      serviceType: data.service_type,
+      notes: data.notes,
+    }),
+  })
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const body = await request.json()
+  const payload = {
+    ...body,
+    category: inferTicketCategory({
+      category: body.category,
+      description: body.description,
+      serviceType: body.service_type,
+      notes: body.notes,
+    }),
+    updated_at: new Date().toISOString(),
+  }
 
   const { data, error } = await supabase
     .from('tickets')
-    .update({ ...body, updated_at: new Date().toISOString() })
+    .update(payload)
     .eq('id', id)
     .select()
     .single()

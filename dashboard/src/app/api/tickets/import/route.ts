@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase/client'
+import { inferTicketCategory } from '@/lib/ticket-categorization'
 
 export async function POST(request: NextRequest) {
   const { rows } = await request.json()
@@ -8,9 +9,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No rows provided' }, { status: 400 })
   }
 
+  const normalizedRows = rows.map((row) => ({
+    ...row,
+    category: inferTicketCategory({
+      category: row.category,
+      description: row.description,
+      serviceType: row.service_type,
+      notes: row.notes,
+    }),
+  }))
+
   const { data, error } = await supabase
     .from('tickets')
-    .upsert(rows, { onConflict: 'order_number' })
+    .upsert(normalizedRows, { onConflict: 'order_number' })
     .select()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

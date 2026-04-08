@@ -8,14 +8,13 @@ import {
   CartesianGrid
 } from 'recharts'
 import { CircleHelp } from 'lucide-react'
-import { toast } from 'sonner'
 import { useTickets } from '@/hooks/use-tickets'
 import { useStats } from '@/hooks/use-stats'
 import { FilterBar } from '@/components/layout/filter-bar'
 import { KPICard } from '@/components/dashboard/kpi-card'
 import { ChartCard } from '@/components/dashboard/chart-card'
 import { formatResolutionTime, shortenName } from '@/lib/utils'
-import type { Ticket, TicketFilters } from '@/lib/types'
+import type { TicketFilters } from '@/lib/types'
 import { CATEGORY_OPTIONS } from '@/lib/constants'
 
 const containerVariants = {
@@ -46,8 +45,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 
 export default function DashboardPage() {
   const [filters, setFilters] = useState<TicketFilters>({})
-  const [savingTicketId, setSavingTicketId] = useState<string | null>(null)
-  const { tickets, loading, refreshing, refetch } = useTickets(filters)
+  const { tickets, loading, refreshing } = useTickets(filters)
   const stats = useStats(tickets)
   const categoryLabelMap = Object.fromEntries(CATEGORY_OPTIONS.map((option) => [option.value, option.label]))
 
@@ -67,35 +65,7 @@ export default function DashboardPage() {
     .sort(([, a], [, b]) => b - a)
     .map(([name, count]) => ({ name: categoryLabelMap[name] || name, count }))
 
-  const uncategorizedTickets = tickets
-    .filter((ticket) => !ticket.category)
-    .slice(0, 8)
-
   const CATEGORY_COLORS = ['#D2262C', '#8B5CF6', '#10B981', '#F59E0B', '#0EA5E9', '#94A3B8']
-
-  const handleCategoryChange = async (ticket: Ticket, category: string) => {
-    if (!category) return
-
-    setSavingTicketId(ticket.id)
-    try {
-      const response = await fetch(`/api/tickets/${ticket.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category }),
-      })
-
-      if (!response.ok) {
-        throw new Error('No se pudo actualizar la categoria')
-      }
-
-      toast.success(`Ticket #${ticket.order_number} categorizado`)
-      await refetch()
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'No se pudo actualizar la categoria')
-    } finally {
-      setSavingTicketId(null)
-    }
-  }
 
   if (loading) {
     return (
@@ -288,83 +258,20 @@ export default function DashboardPage() {
             </div>
           )}
         >
-          <div className="space-y-4">
-            <div className="h-[240px]">
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={categoryData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 12, fill: '#999' }} axisLine={false} tickLine={false} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: '#656565' }} axisLine={false} tickLine={false} width={140} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="count" name="Tickets" radius={[0, 6, 6, 0]}>
-                    {categoryData.map((_, i) => (
-                      <Cell key={i} fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            {uncategorizedTickets.length > 0 && (
-              <div className="rounded-xl border border-dashed border-[#D2262C]/20 bg-surface/60 p-3">
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <div>
-                    <div className="text-[12px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
-                      Pendientes por categorizar
-                    </div>
-                    <div className="text-[13px] text-text-secondary">
-                      Asigna categoria a los tickets que hoy aparecen como &quot;Sin categoria&quot;.
-                    </div>
-                  </div>
-                  <div className="rounded-lg bg-white px-2.5 py-1 text-[12px] font-mono font-semibold text-atisa" style={{ boxShadow: 'var(--shadow-sm)' }}>
-                    {stats.byCategory['Sin categoria'] || uncategorizedTickets.length}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  {uncategorizedTickets.map((ticket) => (
-                    <div key={ticket.id} className="grid gap-2 rounded-lg bg-white p-3 md:grid-cols-[72px_minmax(0,1fr)_200px]" style={{ boxShadow: 'var(--shadow-sm)' }}>
-                      <div className="font-mono text-[12px] font-semibold text-atisa">
-                        #{ticket.order_number}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="truncate text-[13px] font-medium text-text-primary">
-                          {shortenName(ticket.requester)}
-                        </div>
-                        <div className="truncate text-[12px] text-text-secondary">
-                          {ticket.description || 'Sin descripcion'}
-                        </div>
-                      </div>
-                      <select
-                        defaultValue=""
-                        disabled={savingTicketId === ticket.id}
-                        onChange={(event) => {
-                          const value = event.target.value
-                          if (value) {
-                            void handleCategoryChange(ticket, value)
-                            event.target.value = ''
-                          }
-                        }}
-                        className="h-10 rounded-lg border border-gray-200 bg-white px-3 text-[13px] text-text-primary outline-none transition focus:border-atisa/40"
-                      >
-                        <option value="">Selecciona categoria...</option>
-                        {CATEGORY_OPTIONS.map((category) => (
-                          <option key={category.value} value={category.value}>
-                            {category.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+          <div className="h-[240px]">
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={categoryData} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" horizontal={false} />
+                <XAxis type="number" tick={{ fontSize: 12, fill: '#999' }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: '#656565' }} axisLine={false} tickLine={false} width={140} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="count" name="Tickets" radius={[0, 6, 6, 0]}>
+                  {categoryData.map((_, i) => (
+                    <Cell key={i} fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length]} />
                   ))}
-                </div>
-
-                {stats.byCategory['Sin categoria'] > uncategorizedTickets.length && (
-                  <div className="mt-2 text-[12px] text-text-tertiary">
-                    Mostrando los primeros {uncategorizedTickets.length} tickets sin categoria con los filtros actuales.
-                  </div>
-                )}
-              </div>
-            )}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </ChartCard>
       </motion.div>

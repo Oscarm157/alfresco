@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase/client'
+import { inferTicketCategory } from '@/lib/ticket-categorization'
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams
@@ -27,15 +28,34 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+  return NextResponse.json(
+    (data || []).map((ticket) => ({
+      ...ticket,
+      category: inferTicketCategory({
+        category: ticket.category,
+        description: ticket.description,
+        serviceType: ticket.service_type,
+        notes: ticket.notes,
+      }),
+    }))
+  )
 }
 
 export async function POST(request: NextRequest) {
   const body = await request.json()
+  const payload = {
+    ...body,
+    category: inferTicketCategory({
+      category: body.category,
+      description: body.description,
+      serviceType: body.service_type,
+      notes: body.notes,
+    }),
+  }
 
   const { data, error } = await supabase
     .from('tickets')
-    .insert(body)
+    .insert(payload)
     .select()
     .single()
 
