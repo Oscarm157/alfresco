@@ -53,8 +53,8 @@ export function SidebarCollapsible({ collapsed, onToggleCollapsed }: SidebarColl
           ${mobileOpen ? 'translate-x-0 w-[240px]' : '-translate-x-full w-[240px]'}
         `}
       >
-        <div className={`py-5 flex items-center justify-between ${collapsed ? 'px-4 lg:px-3' : 'px-5'}`}>
-          <div className={`flex items-center ${collapsed ? 'justify-center w-full lg:w-auto' : 'gap-3'}`}>
+        <div className={`py-5 flex ${collapsed ? 'flex-col items-center gap-3 px-3' : 'items-center justify-between px-5'}`}>
+          <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="w-8 h-8 bg-atisa rounded-lg flex items-center justify-center text-[11px] font-bold text-white">
               AT
             </div>
@@ -70,14 +70,14 @@ export function SidebarCollapsible({ collapsed, onToggleCollapsed }: SidebarColl
 
           <button
             onClick={() => setMobileOpen(false)}
-            className="text-white/60 hover:text-white lg:hidden"
+            className={`text-white/60 hover:text-white lg:hidden ${collapsed ? 'absolute right-3 top-5' : ''}`}
           >
             <X size={18} />
           </button>
 
           <button
             onClick={onToggleCollapsed}
-            className={`hidden lg:flex items-center justify-center h-9 w-9 rounded-xl text-white/60 transition-colors hover:bg-white/10 hover:text-white ${collapsed ? 'absolute top-5 left-1/2 -translate-x-1/2' : ''}`}
+            className="hidden lg:flex items-center justify-center h-9 w-9 rounded-xl text-white/60 transition-colors hover:bg-white/10 hover:text-white"
             aria-label={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
             title={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
           >
