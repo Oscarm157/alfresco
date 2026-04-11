@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase/client'
-import { inferTicketCategory } from '@/lib/ticket-categorization'
+import { inferTicketCategory, resolveTicketCategory, ticketMatchesCategory } from '@/lib/ticket-category-utils'
+
+type TicketRow = Record<string, unknown> & {
+  category?: string | null
+  description?: string | null
+  service_type?: string | null
+  notes?: string | null
+}
+
+type TicketInsertQuery = {
+  insert: (values: Record<string, unknown>) => {
+    select: () => {
+      single: () => Promise<{ data: TicketRow; error: { message: string } | null }>
+    }
+  }
+}
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams
@@ -20,7 +35,6 @@ export async function GET(request: NextRequest) {
   if (status) query = query.eq('status', status)
   if (priority) query = query.eq('priority', priority)
   if (requester) query = query.eq('requester', requester)
-  if (category) query = query.eq('category', category)
   if (resolvedBy) query = query.eq('resolved_by', resolvedBy)
 
   query = query.order('created_at', { ascending: false })
@@ -28,17 +42,13 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(
-    (data || []).map((ticket) => ({
-      ...ticket,
-      category: inferTicketCategory({
-        category: ticket.category,
-        description: ticket.description,
-        serviceType: ticket.service_type,
-        notes: ticket.notes,
-      }),
-    }))
-  )
+
+  const normalizedTickets = ((data || []) as TicketRow[]).map((ticket) => ({
+    ...ticket,
+    category: resolveTicketCategory(ticket),
+  }))
+
+  return NextResponse.json(normalizedTickets.filter((ticket) => ticketMatchesCategory(ticket, category)))
 }
 
 export async function POST(request: NextRequest) {
@@ -53,8 +63,8 @@ export async function POST(request: NextRequest) {
     }),
   }
 
-  const { data, error } = await supabase
-    .from('tickets')
+  const ticketTable = supabase.from('tickets') as unknown as TicketInsertQuery
+  const { data, error } = await ticketTable
     .insert(payload)
     .select()
     .single()

@@ -1,6 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase/client'
 
+type SprintTaskPointsRow = {
+  story_points: number | null
+  status: string | null
+}
+
+type SprintTaskKeyRow = {
+  sprint_name: string
+  month_key: string
+}
+
+type SprintUpdateQuery = {
+  update: (
+    values: { dev_sp_delivered: number }
+  ) => {
+    eq: (column: string, value: string) => {
+      eq: (column: string, value: string) => Promise<{ error: { message: string } | null }>
+    }
+  }
+}
+
+type SprintTaskUpdateQuery = {
+  update: (
+    values: Record<string, unknown>
+  ) => {
+    eq: (column: string, value: string) => {
+      select: () => {
+        single: () => Promise<{ data: SprintTaskKeyRow; error: { message: string } | null }>
+      }
+    }
+  }
+}
+
+type SprintTaskSelectQuery = {
+  select: (columns: string) => {
+    eq: (column: string, value: string) => {
+      single: () => Promise<{ data: SprintTaskKeyRow; error: { message: string } | null }>
+    }
+  }
+}
+
+type SprintTaskDeleteQuery = {
+  delete: () => {
+    eq: (column: string, value: string) => Promise<{ error: { message: string } | null }>
+  }
+}
+
 async function syncSprintDeliveredPoints(sprintName: string, monthKey: string) {
   const { data: tasks, error: tasksError } = await supabase
     .from('sprint_tasks')
@@ -12,12 +58,15 @@ async function syncSprintDeliveredPoints(sprintName: string, monthKey: string) {
     throw new Error(tasksError.message)
   }
 
-  const deliveredPoints = (tasks || [])
+  const taskRows = (tasks || []) as SprintTaskPointsRow[]
+
+  const deliveredPoints = taskRows
     .filter((task) => task.status === 'completada')
     .reduce((sum, task) => sum + (task.story_points || 0), 0)
 
-  const { error: sprintError } = await supabase
-    .from('sprints')
+  const sprintTable = supabase.from('sprints') as unknown as SprintUpdateQuery
+
+  const { error: sprintError } = await sprintTable
     .update({ dev_sp_delivered: deliveredPoints })
     .eq('name', sprintName)
     .eq('month_key', monthKey)
@@ -31,8 +80,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   const { id } = await params
   const body = await request.json()
 
-  const { data, error } = await supabase
-    .from('sprint_tasks')
+  const sprintTasksTable = supabase.from('sprint_tasks') as unknown as SprintTaskUpdateQuery
+
+  const { data, error } = await sprintTasksTable
     .update(body)
     .eq('id', id)
     .select()
@@ -45,15 +95,17 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const { data: existingTask, error: existingTaskError } = await supabase
-    .from('sprint_tasks')
+  const sprintTasksTable = supabase.from('sprint_tasks') as unknown as SprintTaskSelectQuery
+
+  const { data: existingTask, error: existingTaskError } = await sprintTasksTable
     .select('sprint_name, month_key')
     .eq('id', id)
     .single()
 
   if (existingTaskError) return NextResponse.json({ error: existingTaskError.message }, { status: 500 })
 
-  const { error } = await supabase.from('sprint_tasks').delete().eq('id', id)
+  const sprintTasksDeleteTable = supabase.from('sprint_tasks') as unknown as SprintTaskDeleteQuery
+  const { error } = await sprintTasksDeleteTable.delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   await syncSprintDeliveredPoints(existingTask.sprint_name, existingTask.month_key)

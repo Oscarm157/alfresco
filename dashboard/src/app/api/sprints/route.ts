@@ -1,6 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase/client'
 
+type SprintNameRow = {
+  name: string
+}
+
+type SprintUpsertInput = {
+  month_key?: string
+  name?: string
+  [key: string]: unknown
+}
+
+type SprintUpsertQuery = {
+  upsert: (
+    values: SprintUpsertInput[],
+    options: { onConflict: string }
+  ) => {
+    select: () => Promise<{ data: SprintUpsertInput[] | null; error: { message: string } | null }>
+  }
+}
+
 export async function GET(request: NextRequest) {
   const monthKey = request.nextUrl.searchParams.get('month')
 
@@ -14,9 +33,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const body = await request.json()
-  const items = Array.isArray(body) ? body : [body]
+  const items = (Array.isArray(body) ? body : [body]) as SprintUpsertInput[]
 
-  const monthKeys = [...new Set(items.map((item) => item.month_key).filter(Boolean))]
+  const monthKeys = [...new Set(items.map((item) => item.month_key).filter((monthKey): monthKey is string => Boolean(monthKey)))]
 
   for (const monthKey of monthKeys) {
     const { data: existing, error: existingError } = await supabase
@@ -28,7 +47,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: existingError.message }, { status: 500 })
     }
 
-    const existingNames = new Set((existing || []).map((sprint) => sprint.name))
+    const existingRows = (existing || []) as SprintNameRow[]
+    const existingNames = new Set(existingRows.map((sprint) => sprint.name))
     const incomingNames = new Set(
       items
         .filter((item) => item.month_key === monthKey)
@@ -41,8 +61,9 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const { data, error } = await supabase
-    .from('sprints')
+  const sprintQuery = supabase.from('sprints') as unknown as SprintUpsertQuery
+
+  const { data, error } = await sprintQuery
     .upsert(items, { onConflict: 'name,month_key' })
     .select()
 

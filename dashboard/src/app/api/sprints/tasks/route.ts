@@ -1,6 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase/client'
 
+type SprintTaskPointsRow = {
+  story_points: number | null
+  status: string | null
+}
+
+type SprintTaskRow = {
+  sprint_name: string
+  month_key: string
+}
+
+type SprintUpdateQuery = {
+  update: (
+    values: { dev_sp_delivered: number }
+  ) => {
+    eq: (column: string, value: string) => {
+      eq: (column: string, value: string) => Promise<{ error: { message: string } | null }>
+    }
+  }
+}
+
+type SprintTaskInsertQuery = {
+  insert: (
+    values: Record<string, unknown>[]
+  ) => {
+    select: () => Promise<{ data: SprintTaskRow[] | null; error: { message: string } | null }>
+  }
+}
+
+type SprintTaskInsertSingleQuery = {
+  insert: (
+    value: Record<string, unknown>
+  ) => {
+    select: () => {
+      single: () => Promise<{ data: SprintTaskRow; error: { message: string } | null }>
+    }
+  }
+}
+
 async function syncSprintDeliveredPoints(sprintName: string, monthKey: string) {
   const { data: tasks, error: tasksError } = await supabase
     .from('sprint_tasks')
@@ -12,12 +50,15 @@ async function syncSprintDeliveredPoints(sprintName: string, monthKey: string) {
     throw new Error(tasksError.message)
   }
 
-  const deliveredPoints = (tasks || [])
+  const taskRows = (tasks || []) as SprintTaskPointsRow[]
+
+  const deliveredPoints = taskRows
     .filter((task) => task.status === 'completada')
     .reduce((sum, task) => sum + (task.story_points || 0), 0)
 
-  const { error: sprintError } = await supabase
-    .from('sprints')
+  const sprintTable = supabase.from('sprints') as unknown as SprintUpdateQuery
+
+  const { error: sprintError } = await sprintTable
     .update({ dev_sp_delivered: deliveredPoints })
     .eq('name', sprintName)
     .eq('month_key', monthKey)
@@ -44,17 +85,20 @@ export async function POST(request: NextRequest) {
   const body = await request.json()
 
   if (Array.isArray(body)) {
-    const { data, error } = await supabase.from('sprint_tasks').insert(body).select()
+    const sprintTasksTable = supabase.from('sprint_tasks') as unknown as SprintTaskInsertQuery
+    const { data, error } = await sprintTasksTable.insert(body as Record<string, unknown>[]).select()
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    const sprintPairs = [...new Set(data.map((task) => `${task.sprint_name}::${task.month_key}`))]
+    const insertedTasks = data || []
+    const sprintPairs = [...new Set(insertedTasks.map((task) => `${task.sprint_name}::${task.month_key}`))]
     for (const pair of sprintPairs) {
       const [sprintName, monthKey] = pair.split('::')
       await syncSprintDeliveredPoints(sprintName, monthKey)
     }
-    return NextResponse.json(data, { status: 201 })
+    return NextResponse.json(insertedTasks, { status: 201 })
   }
 
-  const { data, error } = await supabase.from('sprint_tasks').insert(body).select().single()
+  const sprintTasksTable = supabase.from('sprint_tasks') as unknown as SprintTaskInsertSingleQuery
+  const { data, error } = await sprintTasksTable.insert(body as Record<string, unknown>).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   await syncSprintDeliveredPoints(data.sprint_name, data.month_key)
   return NextResponse.json(data, { status: 201 })

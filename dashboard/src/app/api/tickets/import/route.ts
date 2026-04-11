@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase/client'
-import { inferTicketCategory } from '@/lib/ticket-categorization'
+import { resolveTicketCategory } from '@/lib/ticket-category-utils'
+
+type TicketImportRow = Record<string, unknown>
+
+type TicketUpsertQuery = {
+  upsert: (
+    values: TicketImportRow[],
+    options: { onConflict: string }
+  ) => {
+    select: () => Promise<{ data: TicketImportRow[] | null; error: { message: string } | null }>
+  }
+}
 
 export async function POST(request: NextRequest) {
   const { rows } = await request.json()
@@ -11,16 +22,11 @@ export async function POST(request: NextRequest) {
 
   const normalizedRows = rows.map((row) => ({
     ...row,
-    category: inferTicketCategory({
-      category: row.category,
-      description: row.description,
-      serviceType: row.service_type,
-      notes: row.notes,
-    }),
+    category: resolveTicketCategory(row),
   }))
 
-  const { data, error } = await supabase
-    .from('tickets')
+  const ticketTable = supabase.from('tickets') as unknown as TicketUpsertQuery
+  const { data, error } = await ticketTable
     .upsert(normalizedRows, { onConflict: 'order_number' })
     .select()
 

@@ -34,6 +34,11 @@ const TYPE_COLORS: Record<string, string> = {
   mantenimiento: '#8B5CF6',
 }
 
+function getSafePercent(current: number, total: number): number {
+  if (total <= 0) return 0
+  return Math.min((current / total) * 100, 100)
+}
+
 const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { value: number; name: string; color: string }[]; label?: string }) => {
   if (!active || !payload?.length) return null
   return (
@@ -422,7 +427,7 @@ export default function SprintsPage() {
                       <div className="h-1.5 bg-white rounded-full mt-2 overflow-hidden">
                         <div
                           className="h-full rounded-full bg-atisa"
-                          style={{ width: `${Math.min((s.dev_sp_delivered / s.dev_sp_committed) * 100, 100)}%` }}
+                          style={{ width: `${getSafePercent(s.dev_sp_delivered, s.dev_sp_committed)}%` }}
                         />
                       </div>
                     </div>
@@ -435,7 +440,7 @@ export default function SprintsPage() {
                       <div className="h-1.5 bg-white rounded-full mt-2 overflow-hidden">
                         <div
                           className="h-full rounded-full bg-escalated"
-                          style={{ width: `${Math.min((s.maintenance_sp_delivered / s.maintenance_sp_committed) * 100, 100)}%` }}
+                          style={{ width: `${getSafePercent(s.maintenance_sp_delivered, s.maintenance_sp_committed)}%` }}
                         />
                       </div>
                     </div>

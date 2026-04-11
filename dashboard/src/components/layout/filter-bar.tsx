@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { X, Download, FileSpreadsheet, ChevronDown } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import type { TicketFilters } from '@/lib/types'
 import { DATE_PRESETS, STATUS_OPTIONS, PRIORITY_OPTIONS, RESOLVED_BY_OPTIONS } from '@/lib/constants'
-import { getDateRange, getMonthRange } from '@/lib/utils'
+import { getDateRange, getMonthInputValue, getMonthRange } from '@/lib/utils'
 import { supabase } from '@/lib/supabase/client'
 
 interface FilterBarProps {
@@ -13,6 +13,10 @@ interface FilterBarProps {
   onFiltersChange: (filters: TicketFilters) => void
   onExportPDF?: () => void
   onExportExcel?: () => void
+}
+
+type RequesterRow = {
+  requester: string
 }
 
 function FilterSelect({ value, onChange, placeholder, children }: {
@@ -39,8 +43,6 @@ function FilterSelect({ value, onChange, placeholder, children }: {
 
 export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel }: FilterBarProps) {
   const [requesters, setRequesters] = useState<string[]>([])
-  const [activePreset, setActivePreset] = useState<string>('all')
-  const [selectedMonth, setSelectedMonth] = useState<string>('')
 
   useEffect(() => {
     supabase
@@ -49,15 +51,33 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
       .then(({ data, error }) => {
         if (error) { console.error('Failed to fetch requesters:', error); return }
         if (data) {
-          const unique = [...new Set(data.map(d => d.requester))].filter(Boolean).sort()
+          const requesterRows = data as RequesterRow[]
+          const unique = [...new Set(requesterRows.map((row) => row.requester))].filter(Boolean).sort()
           setRequesters(unique)
         }
       })
   }, [])
 
+  const selectedMonth = useMemo(
+    () => getMonthInputValue(filters.dateFrom, filters.dateTo),
+    [filters.dateFrom, filters.dateTo]
+  )
+
+  const activePreset = useMemo(() => {
+    if (!filters.dateFrom || !filters.dateTo) {
+      return 'all'
+    }
+
+    const matchingPreset = DATE_PRESETS.find((preset) => {
+      if (preset.value === 'all') return false
+      const range = getDateRange(preset.value)
+      return range.from === filters.dateFrom && range.to === filters.dateTo
+    })
+
+    return matchingPreset?.value || 'custom_month'
+  }, [filters.dateFrom, filters.dateTo])
+
   const handlePreset = (preset: string) => {
-    setActivePreset(preset)
-    setSelectedMonth('')
     if (preset === 'all') {
       onFiltersChange({ ...filters, dateFrom: undefined, dateTo: undefined })
     } else {
@@ -67,21 +87,16 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
   }
 
   const handleMonthChange = (monthValue: string) => {
-    setSelectedMonth(monthValue)
     if (!monthValue) {
-      setActivePreset('all')
       onFiltersChange({ ...filters, dateFrom: undefined, dateTo: undefined })
       return
     }
 
     const range = getMonthRange(monthValue)
-    setActivePreset('custom_month')
     onFiltersChange({ ...filters, dateFrom: range.from, dateTo: range.to })
   }
 
   const clearFilters = () => {
-    setActivePreset('all')
-    setSelectedMonth('')
     onFiltersChange({})
   }
 

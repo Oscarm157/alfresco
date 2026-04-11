@@ -3,7 +3,6 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Plus, Search, Hourglass, CheckCircle2, XCircle, AlertTriangle, ChevronDown } from 'lucide-react'
-import { toast } from 'sonner'
 import { useTickets } from '@/hooks/use-tickets'
 import { formatDate, shortenName } from '@/lib/utils'
 import type { ResolvedBy, TicketFilters, TicketStatus } from '@/lib/types'
@@ -172,13 +171,12 @@ export default function TicketsPage() {
           Detalle de <span className="text-atisa">tickets</span>
         </h1>
         <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={() => toast.info('Formulario de creacion de tickets proximamente')}
-          className="flex items-center gap-2 px-5 h-10 rounded-lg bg-atisa text-white text-[13px] font-semibold shadow-[0_2px_8px_rgba(210,38,44,0.25)] hover:bg-atisa-hover transition-colors"
+          disabled
+          className="flex items-center gap-2 px-5 h-10 rounded-lg bg-surface text-text-tertiary text-[13px] font-semibold cursor-not-allowed"
+          title="La creacion de tickets aun no esta disponible"
         >
           <Plus size={16} />
-          Nuevo ticket
+          Nuevo ticket (proximamente)
         </motion.button>
       </motion.div>
 

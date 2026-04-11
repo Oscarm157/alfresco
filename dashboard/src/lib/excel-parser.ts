@@ -1,6 +1,7 @@
 ﻿import * as XLSX from 'xlsx'
 import { parseSpanishDate, normalizeStatus, normalizePriority, parseResolutionTime } from './utils'
 import type { ImportRow } from './types'
+import { resolveTicketCategory } from './ticket-category-utils'
 
 interface RawRow {
   [key: string]: string | number | undefined
@@ -86,6 +87,8 @@ export function transformRows(rows: RawRow[], mapping: Record<string, string>): 
         continue
       }
 
+      const description = get('description') || null
+      const serviceType = get('service_type') || null
       const resTimeDisplay = get('resolution_time_display')
 
       valid.push({
@@ -95,12 +98,12 @@ export function transformRows(rows: RawRow[], mapping: Record<string, string>): 
         priority: normalizePriority(get('priority')) as ImportRow['priority'],
         technician: get('technician') || null,
         requester,
-        description: get('description') || null,
-        service_type: get('service_type') || null,
+        description,
+        service_type: serviceType,
         resolution_time_minutes: parseResolutionTime(resTimeDisplay),
         resolution_time_display: resTimeDisplay || '-',
         resolved_by: null,
-        category: null,
+        category: resolveTicketCategory({ description, service_type: serviceType }),
       })
     } catch (err) {
       errors.push({ row: i + 1, error: String(err) })

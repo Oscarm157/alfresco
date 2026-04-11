@@ -95,6 +95,20 @@ export function getMonthRange(monthValue: string): { from: string; to: string } 
   }
 }
 
+export function getMonthInputValue(dateFrom?: string, dateTo?: string): string {
+  if (!dateFrom || !dateTo) return ''
+
+  const from = new Date(`${dateFrom}T00:00:00`)
+  const to = new Date(`${dateTo}T00:00:00`)
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) return ''
+
+  const expectedFrom = format(startOfMonth(from), 'yyyy-MM-dd')
+  const expectedTo = format(endOfMonth(from), 'yyyy-MM-dd')
+
+  if (dateFrom !== expectedFrom || dateTo !== expectedTo) return ''
+  return format(from, 'yyyy-MM')
+}
+
 export function shortenName(name: string): string {
   if (!name) return ''
   const parts = name.trim().split(/\s+/)
