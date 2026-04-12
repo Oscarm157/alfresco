@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react'
+import { ArrowUpRight, ArrowDownRight, GitCompare, Minus, Ticket, TimerReset } from 'lucide-react'
 import { useTickets } from '@/hooks/use-tickets'
 import { useStats } from '@/hooks/use-stats'
 import { formatResolutionTime } from '@/lib/utils'
@@ -51,19 +51,79 @@ export default function CompareTicketsPage() {
     { label: 'Tiempo prom.', a: statsA.avgResolutionMinutes, b: statsB.avgResolutionMinutes, invert: true, formatFn: formatResolutionTime },
   ]
 
-  return (
-    <div>
-      <h1 className="font-heading text-[28px] font-bold tracking-tight text-text-primary mb-1">
-        Comparar <span className="text-atisa">Tickets</span>
-      </h1>
-      <p className="text-sm text-text-tertiary mb-8">
-        Vista comparativa entre periodos para tickets y resolucion
-      </p>
+  const monthCards = [
+    {
+      label: labelA,
+      total: statsA.total,
+      resolution: `${Math.round(statsA.resolutionRate)}%`,
+      avgTime: formatResolutionTime(statsA.avgResolutionMinutes),
+      accent: 'bg-surface-alt text-text-primary',
+    },
+    {
+      label: labelB,
+      total: statsB.total,
+      resolution: `${Math.round(statsB.resolutionRate)}%`,
+      avgTime: formatResolutionTime(statsB.avgResolutionMinutes),
+      accent: 'bg-atisa/5 text-atisa',
+    },
+  ]
 
-      <div className="grid grid-cols-1 gap-4 mb-4 md:grid-cols-[160px_1fr_1fr]">
+  return (
+    <div className="space-y-6">
+      <div className="rounded-[28px] bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-surface px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
+              <GitCompare size={14} />
+              Comparativo operativo
+            </div>
+            <h1 className="font-heading text-[30px] font-bold tracking-tight text-text-primary">
+              Comparar <span className="text-atisa">Tickets</span>
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-text-tertiary">
+              Lectura rápida de volumen, resolución y tiempos entre el mes anterior y el actual.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {monthCards.map((card) => (
+              <div key={card.label} className={`min-w-[220px] rounded-2xl p-4 ${card.accent}`}>
+                <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em]">{card.label}</div>
+                <div className="grid grid-cols-3 gap-3 text-sm">
+                  <div>
+                    <div className="text-text-tertiary">Tickets</div>
+                    <div className="font-mono text-lg font-bold text-text-primary">{card.total}</div>
+                  </div>
+                  <div>
+                    <div className="text-text-tertiary">Resol.</div>
+                    <div className="font-mono text-lg font-bold text-text-primary">{card.resolution}</div>
+                  </div>
+                  <div>
+                    <div className="text-text-tertiary">Prom.</div>
+                    <div className="font-mono text-lg font-bold text-text-primary">{card.avgTime}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[180px_1fr_1fr]">
         <div className="hidden md:block" />
-        <div className="rounded-xl bg-surface-alt py-3 text-center font-heading text-sm font-semibold capitalize text-text-primary">{labelA}</div>
-        <div className="rounded-xl bg-atisa/5 py-3 text-center font-heading text-sm font-semibold capitalize text-atisa">{labelB}</div>
+        <div className="rounded-2xl border border-black/5 bg-white px-5 py-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+          <div className="mb-2 flex items-center gap-2 text-text-tertiary">
+            <Ticket size={14} />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.16em]">Base</span>
+          </div>
+          <div className="font-heading text-lg font-bold capitalize text-text-primary">{labelA}</div>
+        </div>
+        <div className="rounded-2xl border border-atisa/10 bg-white px-5 py-4 shadow-[0_2px_12px_rgba(210,38,44,0.08)]">
+          <div className="mb-2 flex items-center gap-2 text-atisa">
+            <TimerReset size={14} />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.16em]">Actual</span>
+          </div>
+          <div className="font-heading text-lg font-bold capitalize text-text-primary">{labelB}</div>
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -73,19 +133,27 @@ export default function CompareTicketsPage() {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="grid grid-cols-1 items-center gap-4 md:grid-cols-[160px_1fr_1fr]"
+            className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-[180px_1fr_1fr]"
           >
-            <div className="text-sm font-medium text-text-secondary">{m.label}</div>
-            <div className="rounded-xl bg-white p-4 text-center shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-              <span className="font-mono text-2xl font-bold text-text-primary">
+            <div className="flex items-center rounded-2xl bg-surface px-4 py-4 text-sm font-semibold text-text-secondary">
+              {m.label}
+            </div>
+            <div className="rounded-2xl border border-black/5 bg-white p-5 text-center shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+              <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">{labelA}</div>
+              <span className="font-mono text-[28px] font-bold text-text-primary">
                 {m.formatFn ? m.formatFn(m.a) : m.a}{m.suffix || ''}
               </span>
             </div>
-            <div className="flex items-center justify-center gap-3 rounded-xl bg-white p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-              <span className="font-mono text-2xl font-bold text-text-primary">
-                {m.formatFn ? m.formatFn(m.b) : m.b}{m.suffix || ''}
-              </span>
-              <DeltaIndicator current={m.b} previous={m.a} invert={m.invert} />
+            <div className="flex items-center justify-center gap-3 rounded-2xl border border-atisa/10 bg-white p-5 shadow-[0_2px_12px_rgba(210,38,44,0.08)]">
+              <div>
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">{labelB}</div>
+                <span className="font-mono text-[28px] font-bold text-text-primary">
+                  {m.formatFn ? m.formatFn(m.b) : m.b}{m.suffix || ''}
+                </span>
+              </div>
+              <div className="rounded-full bg-surface px-3 py-1.5">
+                <DeltaIndicator current={m.b} previous={m.a} invert={m.invert} />
+              </div>
             </div>
           </motion.div>
         ))}
