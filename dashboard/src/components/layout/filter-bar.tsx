@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { X, Download, FileSpreadsheet, ChevronDown } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import type { TicketFilters } from '@/lib/types'
-import { DATE_PRESETS, STATUS_OPTIONS, PRIORITY_OPTIONS, RESOLVED_BY_OPTIONS } from '@/lib/constants'
+import { DATE_PRESETS, STATUS_OPTIONS, PRIORITY_OPTIONS, RESOLVED_BY_OPTIONS, CATEGORY_OPTIONS } from '@/lib/constants'
 import { getDateRange, getMonthInputValue, getMonthRange } from '@/lib/utils'
 import { supabase } from '@/lib/supabase/client'
 
@@ -13,6 +13,8 @@ interface FilterBarProps {
   onFiltersChange: (filters: TicketFilters) => void
   onExportPDF?: () => void
   onExportExcel?: () => void
+  hideStatus?: boolean
+  hideResolvedBy?: boolean
 }
 
 type RequesterRow = {
@@ -41,7 +43,7 @@ function FilterSelect({ value, onChange, placeholder, children }: {
   )
 }
 
-export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel }: FilterBarProps) {
+export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel, hideStatus = false, hideResolvedBy = false }: FilterBarProps) {
   const [requesters, setRequesters] = useState<string[]>([])
 
   useEffect(() => {
@@ -100,7 +102,7 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
     onFiltersChange({})
   }
 
-  const hasFilters = filters.status || filters.priority || filters.requester || filters.resolvedBy || filters.dateFrom
+  const hasFilters = filters.status || filters.priority || filters.requester || filters.resolvedBy || filters.category || filters.dateFrom
 
   return (
     <div className="rounded-xl px-4 py-3 mb-5 bg-surface space-y-2.5">
@@ -136,15 +138,17 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
           />
         </div>
 
-        <FilterSelect
-          value={filters.status || ''}
-          onChange={(v) => onFiltersChange({ ...filters, status: v as TicketFilters['status'] || undefined })}
-          placeholder="Estado"
-        >
-          {STATUS_OPTIONS.map(o => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </FilterSelect>
+        {!hideStatus && (
+          <FilterSelect
+            value={filters.status || ''}
+            onChange={(v) => onFiltersChange({ ...filters, status: v as TicketFilters['status'] || undefined })}
+            placeholder="Estado"
+          >
+            {STATUS_OPTIONS.map(o => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </FilterSelect>
+        )}
 
         <FilterSelect
           value={filters.priority || ''}
@@ -167,14 +171,26 @@ export function FilterBar({ filters, onFiltersChange, onExportPDF, onExportExcel
         </FilterSelect>
 
         <FilterSelect
-          value={filters.resolvedBy || ''}
-          onChange={(v) => onFiltersChange({ ...filters, resolvedBy: v as TicketFilters['resolvedBy'] || undefined })}
-          placeholder="Resuelto por"
+          value={filters.category || ''}
+          onChange={(v) => onFiltersChange({ ...filters, category: v || undefined })}
+          placeholder="Categoria"
         >
-          {RESOLVED_BY_OPTIONS.map(o => (
+          {CATEGORY_OPTIONS.map(o => (
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </FilterSelect>
+
+        {!hideResolvedBy && (
+          <FilterSelect
+            value={filters.resolvedBy || ''}
+            onChange={(v) => onFiltersChange({ ...filters, resolvedBy: v as TicketFilters['resolvedBy'] || undefined })}
+            placeholder="Resuelto por"
+          >
+            {RESOLVED_BY_OPTIONS.map(o => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </FilterSelect>
+        )}
 
         <AnimatePresence>
           {hasFilters && (

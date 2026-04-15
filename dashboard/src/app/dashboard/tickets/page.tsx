@@ -2,10 +2,13 @@
 
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { Plus, Search, Hourglass, CheckCircle2, XCircle, AlertTriangle, ChevronDown } from 'lucide-react'
 import { useTickets } from '@/hooks/use-tickets'
+import { FilterBar } from '@/components/layout/filter-bar'
 import { formatDate, shortenName } from '@/lib/utils'
-import type { ResolvedBy, TicketFilters, TicketStatus } from '@/lib/types'
+import type { ResolvedBy, Ticket, TicketFilters, TicketStatus } from '@/lib/types'
 
 const containerVariants = {
   hidden: {},
@@ -123,7 +126,7 @@ function getPriorityBadge(priority: string) {
 }
 
 export default function TicketsPage() {
-  const [filters] = useState<TicketFilters>({})
+  const [filters, setFilters] = useState<TicketFilters>({})
   const [activeTab, setActiveTab] = useState<TicketStatus>('pendiente')
   const [search, setSearch] = useState('')
   const [resolvedByFilter, setResolvedByFilter] = useState<ResolvedBy[]>([])
@@ -147,6 +150,26 @@ export default function TicketsPage() {
     }
     return result
   }, [tickets, activeTab, resolvedByFilter, search])
+
+  const grouped = useMemo(() => {
+    const sorted = [...filtered].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
+    const groups = new Map<string, Ticket[]>()
+    for (const t of sorted) {
+      const d = new Date(t.created_at)
+      const key = Number.isNaN(d.getTime()) ? 'sin-fecha' : format(d, 'yyyy-MM')
+      if (!groups.has(key)) groups.set(key, [])
+      groups.get(key)!.push(t)
+    }
+    return Array.from(groups.entries()).map(([key, items]) => ({
+      key,
+      label: key === 'sin-fecha'
+        ? 'Sin fecha'
+        : format(new Date(`${key}-01T00:00:00`), "LLLL yyyy", { locale: es }),
+      items,
+    }))
+  }, [filtered])
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {}
@@ -178,6 +201,11 @@ export default function TicketsPage() {
           <Plus size={16} />
           Nuevo ticket (proximamente)
         </motion.button>
+      </motion.div>
+
+      {/* Filters (fechas/mes, prioridad, solicitante, categoria) */}
+      <motion.div variants={itemVariants}>
+        <FilterBar filters={filters} onFiltersChange={setFilters} hideStatus hideResolvedBy />
       </motion.div>
 
       {/* Tabs */}
@@ -266,92 +294,100 @@ export default function TicketsPage() {
           <p className="text-[13px] text-text-tertiary">Ajusta los filtros o busca otro termino</p>
         </div>
       ) : (
-        <motion.div variants={itemVariants} className="space-y-2">
-          {filtered.map((ticket) => {
-            const isExpanded = expandedId === ticket.id
-            const isLong = isLongDescription(ticket.description)
-
-            return (
-              <div
-                key={ticket.id}
-                className="bg-white rounded-xl overflow-hidden transition-shadow"
-                style={{ boxShadow: 'var(--shadow-sm)' }}
-              >
-                {/* Row header - always visible */}
-                <div
-                  className={`flex items-start gap-4 px-4 py-3.5 ${isLong ? 'cursor-pointer hover:bg-surface/30' : ''}`}
-                  onClick={() => isLong && setExpandedId(isExpanded ? null : ticket.id)}
-                >
-                  {/* Order */}
-                  <span className="font-mono font-semibold text-atisa text-[13px] min-w-[70px] pt-0.5">
-                    #{ticket.order_number}
-                  </span>
-
-                  {/* Date */}
-                  <span className="font-mono text-[12px] text-text-tertiary min-w-[50px] pt-0.5">
-                    {formatDate(ticket.created_at, 'dd MMM')}
-                  </span>
-
-                  {/* Priority */}
-                  <span className={`inline-block w-[70px] text-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${getPriorityBadge(ticket.priority)}`}>
-                    {ticket.priority}
-                  </span>
-
-                  {/* Requester */}
-                  <span className="text-[13px] font-medium text-text-primary min-w-[90px] whitespace-nowrap pt-0.5">
-                    {shortenName(ticket.requester)}
-                  </span>
-
-                  {/* Description preview */}
-                  <span className="text-[13px] text-text-secondary flex-1 leading-relaxed pt-0.5">
-                    {isLong && !isExpanded
-                      ? `${ticket.description?.slice(0, 120)}...`
-                      : !isLong
-                        ? ticket.description || 'Sin descripcion'
-                        : null
-                    }
-                  </span>
-
-                  {/* Resolution info (only for resueltos) */}
-                  {activeTab === 'resuelto' && ticket.resolution_time_display && (
-                    <span className="font-mono text-[12px] font-semibold text-escalated whitespace-nowrap pt-0.5">
-                      {ticket.resolution_time_display}
-                    </span>
-                  )}
-                  {activeTab === 'resuelto' && ticket.resolved_by && (
-                    <span className="text-[12px] text-text-tertiary whitespace-nowrap pt-0.5">
-                      {ticket.resolved_by}
-                    </span>
-                  )}
-
-                  {/* Expand indicator */}
-                  {isLong && (
-                    <ChevronDown
-                      size={14}
-                      className={`text-text-tertiary flex-shrink-0 mt-1 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                    />
-                  )}
-                </div>
-
-                {/* Expanded description */}
-                <AnimatePresence>
-                  {isExpanded && isLong && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="px-4 pb-4 pt-1 ml-[120px] border-t border-gray-50">
-                        {formatDescription(ticket.description)}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+        <motion.div variants={itemVariants} className="space-y-6">
+          {grouped.map((group) => (
+            <section key={group.key}>
+              <div className="sticky top-0 z-10 -mx-1 mb-2 flex items-center gap-3 bg-gradient-to-b from-[var(--background,#f7f7f8)] to-transparent px-1 py-2">
+                <div className="w-1 h-4 rounded-full bg-atisa" />
+                <h2 className="font-heading text-[14px] font-bold text-text-primary capitalize">
+                  {group.label}
+                </h2>
+                <span className="font-mono text-[11px] font-semibold text-text-tertiary">
+                  {group.items.length} {group.items.length === 1 ? 'ticket' : 'tickets'}
+                </span>
+                <div className="flex-1 h-px bg-gray-100" />
               </div>
-            )
-          })}
+
+              <div className="space-y-2">
+                {group.items.map((ticket) => {
+                  const isExpanded = expandedId === ticket.id
+                  const isLong = isLongDescription(ticket.description)
+
+                  return (
+                    <div
+                      key={ticket.id}
+                      className="bg-white rounded-xl overflow-hidden transition-shadow"
+                      style={{ boxShadow: 'var(--shadow-sm)' }}
+                    >
+                      <div
+                        className={`flex items-start gap-4 px-4 py-3.5 ${isLong ? 'cursor-pointer hover:bg-surface/30' : ''}`}
+                        onClick={() => isLong && setExpandedId(isExpanded ? null : ticket.id)}
+                      >
+                        <span className="font-mono font-semibold text-atisa text-[13px] min-w-[70px] pt-0.5">
+                          #{ticket.order_number}
+                        </span>
+
+                        <span className="font-mono text-[12px] text-text-tertiary min-w-[50px] pt-0.5">
+                          {formatDate(ticket.created_at, 'dd MMM')}
+                        </span>
+
+                        <span className={`inline-block w-[70px] text-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${getPriorityBadge(ticket.priority)}`}>
+                          {ticket.priority}
+                        </span>
+
+                        <span className="text-[13px] font-medium text-text-primary min-w-[90px] whitespace-nowrap pt-0.5">
+                          {shortenName(ticket.requester)}
+                        </span>
+
+                        <span className="text-[13px] text-text-secondary flex-1 leading-relaxed pt-0.5">
+                          {isLong && !isExpanded
+                            ? `${ticket.description?.slice(0, 120)}...`
+                            : !isLong
+                              ? ticket.description || 'Sin descripcion'
+                              : null
+                          }
+                        </span>
+
+                        {activeTab === 'resuelto' && ticket.resolution_time_display && (
+                          <span className="font-mono text-[12px] font-semibold text-escalated whitespace-nowrap pt-0.5">
+                            {ticket.resolution_time_display}
+                          </span>
+                        )}
+                        {activeTab === 'resuelto' && ticket.resolved_by && (
+                          <span className="text-[12px] text-text-tertiary whitespace-nowrap pt-0.5">
+                            {ticket.resolved_by}
+                          </span>
+                        )}
+
+                        {isLong && (
+                          <ChevronDown
+                            size={14}
+                            className={`text-text-tertiary flex-shrink-0 mt-1 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                          />
+                        )}
+                      </div>
+
+                      <AnimatePresence>
+                        {isExpanded && isLong && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="px-4 pb-4 pt-1 ml-[120px] border-t border-gray-50">
+                              {formatDescription(ticket.description)}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
+          ))}
         </motion.div>
       )}
     </motion.div>
