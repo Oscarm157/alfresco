@@ -27,6 +27,8 @@ export async function GET(request: NextRequest) {
     'f9dfa7f9-b6c1-4c06-95a9-ece5538f1a91',
     '595a5f0c-df19-4b55-9928-d523aed0c101',
     '8ffd4a2e-0da8-40c1-b859-aba59e25ea85',
+    '512df9bf-5f44-41f1-b64b-fac5a168f2aa',
+    '978ef9a9-a9b2-4c90-ad82-92c671e63c58',
   ]
 
   let query = supabase.from('tickets').select('*').not('id', 'in', `(${EXCLUDED_IDS.join(',')})`)
