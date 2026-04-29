@@ -361,8 +361,6 @@ export default function DashboardPage() {
                 {/* Grid */}
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: 'Más rápido', value: stats.minResolutionMinutes, color: '#10B981' },
-                    { label: 'Más lento', value: stats.maxResolutionMinutes, color: '#EF4444' },
                     { label: 'Promedio', value: stats.avgResolutionMinutes, color: '#8B5CF6' },
                     { label: 'Mediana', value: stats.medianResolutionMinutes, color: '#0EA5E9' },
                   ].map((t) => (
