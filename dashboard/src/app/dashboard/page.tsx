@@ -372,12 +372,6 @@ export default function DashboardPage() {
                     </div>
                   ))}
                 </div>
-                <div className="mt-3 pt-3 border-t border-gray-100 text-[12px]">
-                  <span className="font-mono font-semibold text-text-primary">
-                    {tickets.filter(t => t.resolution_time_minutes && t.resolution_time_minutes > 0).length}
-                  </span>
-                  <span className="text-text-tertiary ml-1">de {stats.resueltos} resueltos con tiempo</span>
-                </div>
               </div>
             )
           })()}
